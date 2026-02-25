@@ -25,6 +25,10 @@ const contentLines = [
   { text: 'co-founder of circle of champions — built a network across 12+ houston schools.' },
   { text: 'co-founder of klein business academy — taught financial literacy to 30+ students.' },
   { text: '' },
+  { type: 'section-label', text: 'high school projects' },
+  { type: 'experience', role: 'impossiball', place: 'unity/c# game', date: '2018', href: 'https://github.com/Agent-Tiger/ImpossiBall' },
+  { type: 'experience', role: 'king of the hill', place: 'multiplayer game', date: '2019', href: 'https://github.com/Agent-Tiger/KOHMultiplayer' },
+  { text: '' },
   { type: 'section-label', text: 'education' },
   { text: 'b.b.a., canfield business honors — the university of texas at austin (2025–2029).' },
   { text: 'certificate in programming & computation · gpa: 4.00/4.00 · university honors.' },
@@ -131,14 +135,21 @@ function Line({ line, index }) {
   }
 
   if (line.type === 'experience') {
+    const content = (
+      <div className="experience-item">
+        <span className="experience-dot" />
+        <span className="experience-role">{line.role}</span>
+        <span className="experience-place">@ {line.place}</span>
+        <span className="experience-date">{line.date}</span>
+      </div>
+    )
     return (
       <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
-        <div className="experience-item">
-          <span className="experience-dot" />
-          <span className="experience-role">{line.role}</span>
-          <span className="experience-place">@ {line.place}</span>
-          <span className="experience-date">{line.date}</span>
-        </div>
+        {line.href ? (
+          <a href={line.href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', textDecoration: 'none' }}>
+            {content}
+          </a>
+        ) : content}
       </div>
     )
   }
