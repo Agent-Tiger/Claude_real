@@ -103,6 +103,7 @@
   background-color: var(--cursor-color);
   transform: translateY(0.25rem);
   animation: blink 1s step-end infinite;
+  margin-left: 2px;
 }
 
 @keyframes blink {
@@ -120,7 +121,6 @@
 /* ── SKIP HINT ── */
 .skip-hint {
   margin-left: 0.75rem;
-  margin-top: 0.5rem;
   font-size: 0.75rem;
   font-style: italic;
   color: var(--text-muted);
@@ -302,7 +302,6 @@
   margin-top: auto;
   padding: 2.5rem 0;
   border-top: none;
-  /* removed top border */
   width: 100%;
 }
 
