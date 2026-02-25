@@ -60,9 +60,9 @@ const contentLines = [
 ]
 
 /* ── Typewriter hook ────────────────────────────────── */
-const TYPE_DELAY = 65
-const LINE_PAUSE = 450
-const SECTION_PAUSE = 800
+const TYPE_DELAY = 40
+const LINE_PAUSE = 190
+const SECTION_PAUSE = 350
 
 function useTypewriter(lines) {
   const [visibleLines, setVisibleLines] = useState([])
