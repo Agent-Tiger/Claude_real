@@ -283,6 +283,14 @@
 }
 
 /* ── SLIDING GRID ── */
+.sliding-grid-wrapper {
+  /* extra space so the outer-boundary cells (one cell top/bottom) don't get clipped */
+  padding: 44px 0;
+  /* CH = 44px — matches JS value */
+  margin: -44px 0;
+  overflow: visible;
+}
+
 .sliding-grid {
   overflow: visible;
   margin: 0.5rem 0;
@@ -295,7 +303,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
   padding: 0 0.75rem;
   border: 1px solid var(--border);
   border-radius: calc(0.5rem - 2px);

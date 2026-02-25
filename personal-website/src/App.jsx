@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import longhornsLogo from './assets/longhorns.png'
 import './App.css'
 
-/* ── All interests + languages in one list ─────────── */
+/* ── 3×5 sliding grid data ──────────────────────────── */
+// Exactly 15 items = 3 rows × 5 cols
 const allTags = [
   { label: 'chai making', href: 'https://en.wikipedia.org/wiki/Masala_chai' },
-  { label: 'arabic calligraphy', href: 'https://en.wikipedia.org/wiki/Arabic_calligraphy' },
+  { label: 'calligraphy', href: 'https://en.wikipedia.org/wiki/Arabic_calligraphy' },
   { label: 'thrifting', href: 'https://en.wikipedia.org/wiki/Thrift_store' },
   { label: 'chess', href: 'https://en.wikipedia.org/wiki/Chess' },
   { label: 'guitar', href: 'https://en.wikipedia.org/wiki/Guitar' },
@@ -17,100 +18,149 @@ const allTags = [
   { label: 'hindi', href: 'https://en.wikipedia.org/wiki/Hindi' },
   { label: 'punjabi', href: 'https://en.wikipedia.org/wiki/Punjabi_language' },
   { label: 'hindko', href: 'https://en.wikipedia.org/wiki/Hindko' },
-  { label: 'arabic ↗', href: 'https://en.wikipedia.org/wiki/Arabic' },
-  { label: 'spanish ↗', href: 'https://en.wikipedia.org/wiki/Spanish_language' },
+  { label: 'arabic', href: 'https://en.wikipedia.org/wiki/Arabic' },
+  { label: 'spanish', href: 'https://en.wikipedia.org/wiki/Spanish_language' },
 ]
 
-/* ── 3×5 Sliding Grid ──────────────────────────────── */
-const COLS = 5
+/* ── Sliding Grid component ─────────────────────────── */
+//
+// Logic:
+//   - Grid is 3 rows (0-2) x 5 columns (0-4).
+//   - We use a "Cycle" movement to ensure no overlaps and same speed.
+//   - Randomly chooses between:
+//     1. Shift Row (wrap-around)
+//     2. Shift Column (wrap-around)
+//     3. Rotate Outer Ring
+//   - Movements happen on a virtual 5x7 grid to show items "exiting and re-entering".
+//
 const ROWS = 3
-const CELL_W = 128   // px, including gap
-const CELL_H = 44    // px, including gap
+const COLS = 5
+const CW = 116   // cell width (px)
+const CH = 44    // cell height (px)
 const GAP = 8
+const ANIM_MS = 1200 // Slightly slower, smoother movement
 
 function SlidingGrid({ items }) {
-  // positions[i] = {col, row} — where each item currently sits
-  const [positions, setPositions] = useState(() =>
+  // pos[i] = { col, row }
+  const [pos, setPos] = useState(() =>
     items.map((_, i) => ({ col: i % COLS, row: Math.floor(i / COLS) }))
   )
+  const [visualPos, setVisualPos] = useState(() =>
+    items.map((_, i) => ({ col: i % COLS, row: Math.floor(i / COLS) }))
+  )
+  const [noTrans, setNoTrans] = useState(new Set())
+  const busy = useRef(false)
+  const timerRef = useRef(null)
 
-  const intervalRef = useRef(null)
+  const doStep = useCallback(() => {
+    if (busy.current) return
+    busy.current = true
+
+    const moveType = Math.floor(Math.random() * 3) // 0: row, 1: col, 2: outer ring
+    const nextVisual = pos.map(p => ({ ...p }))
+    const nextPos = pos.map(p => ({ ...p }))
+    const movingIndices = []
+
+    if (moveType === 0) {
+      // Shift Row
+      const r = Math.floor(Math.random() * ROWS)
+      const d = Math.random() < 0.5 ? 1 : -1
+      for (let i = 0; i < items.length; i++) {
+        if (pos[i].row === r) {
+          nextVisual[i].col += d
+          nextPos[i].col = (pos[i].col + d + COLS) % COLS
+          movingIndices.push(i)
+        }
+      }
+    } else if (moveType === 1) {
+      // Shift Column
+      const c = Math.floor(Math.random() * COLS)
+      const d = Math.random() < 0.5 ? 1 : -1
+      for (let i = 0; i < items.length; i++) {
+        if (pos[i].col === c) {
+          nextVisual[i].row += d
+          nextPos[i].row = (pos[i].row + d + ROWS) % ROWS
+          movingIndices.push(i)
+        }
+      }
+    } else {
+      // Rotate Outer Ring
+      const d = Math.random() < 0.5 ? 1 : -1
+      // Outer ring indices in order: (0,0)->(1,0)->(2,0)->(3,0)->(4,0)->(4,1)->(4,2)->(3,2)->(2,2)->(1,2)->(0,2)->(0,1)
+      const ring = [
+        [0, 0], [1, 0], [2, 0], [3, 0], [4, 0],
+        [4, 1],
+        [4, 2], [3, 2], [2, 2], [1, 2], [0, 2],
+        [0, 1]
+      ]
+      for (let i = 0; i < items.length; i++) {
+        const ringIdx = ring.findIndex(([c, r]) => pos[i].col === c && pos[i].row === r)
+        if (ringIdx !== -1) {
+          const nextIdx = (ringIdx + d + ring.length) % ring.length
+          nextVisual[i].col += (ring[nextIdx][0] - ring[ringIdx][0])
+          nextVisual[i].row += (ring[nextIdx][1] - ring[ringIdx][1])
+          nextPos[i].col = ring[nextIdx][0]
+          nextPos[i].row = ring[nextIdx][1]
+          movingIndices.push(i)
+        }
+      }
+    }
+
+    setVisualPos(nextVisual)
+
+    setTimeout(() => {
+      setNoTrans(new Set(movingIndices))
+      setPos(nextPos)
+      setVisualPos(nextPos)
+      setTimeout(() => {
+        setNoTrans(new Set())
+        busy.current = false
+      }, 50)
+    }, ANIM_MS + 20)
+  }, [pos, items.length])
 
   useEffect(() => {
-    function doSwap() {
-      setPositions(prev => {
-        const next = prev.map(p => ({ ...p }))
-        // Pick a random item and a random neighbour direction
-        const idx = Math.floor(Math.random() * items.length)
-        const dirs = [
-          { dc: 1, dr: 0 }, { dc: -1, dr: 0 },
-          { dc: 0, dr: 1 }, { dc: 0, dr: -1 },
-        ]
-        const dir = dirs[Math.floor(Math.random() * dirs.length)]
-        const newCol = next[idx].col + dir.dc
-        const newRow = next[idx].row + dir.dr
-
-        // Allow one cell outside grid temporarily
-        if (newCol < -1 || newCol > COLS || newRow < -1 || newRow > ROWS) return prev
-
-        // Find if another item occupies target cell (within grid)
-        const targetIdx = next.findIndex(
-          (p, j) => j !== idx && p.col === newCol && p.row === newRow
-        )
-        // Swap (or just move if target is outside main grid bounds)
-        if (targetIdx !== -1) {
-          // swap positions
-          const tmp = { ...next[idx] }
-          next[idx] = { ...next[targetIdx] }
-          next[targetIdx] = tmp
-        } else {
-          // move freely (temporarily outside grid)
-          next[idx] = { col: newCol, row: newRow }
-        }
-        return next
-      })
+    function schedule() {
+      timerRef.current = setTimeout(() => {
+        doStep()
+        schedule()
+      }, 2500 + Math.random() * 2000)
     }
+    schedule()
+    return () => clearTimeout(timerRef.current)
+  }, [doStep])
 
-    // stagger: fire swaps on an irregular cadence
-    function scheduleNext() {
-      const delay = 600 + Math.random() * 1000
-      intervalRef.current = setTimeout(() => {
-        doSwap()
-        scheduleNext()
-      }, delay)
-    }
-    scheduleNext()
-    return () => clearTimeout(intervalRef.current)
-  }, [items.length])
-
-  const gridW = COLS * (CELL_W - GAP) + GAP
-  const gridH = ROWS * (CELL_H - GAP) + GAP
+  const offsetX = CW
+  const offsetY = CH
 
   return (
-    <div
-      className="sliding-grid"
-      style={{ width: gridW, height: gridH, position: 'relative' }}
-    >
-      {items.map((item, i) => {
-        const { col, row } = positions[i]
-        const x = col * CELL_W
-        const y = row * CELL_H
-        return (
-          <a
-            key={item.label}
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="grid-tag"
-            style={{
-              transform: `translate(${x}px, ${y}px)`,
-              width: CELL_W - GAP,
-            }}
-          >
-            {item.label}
-          </a>
-        )
-      })}
+    <div className="sliding-grid" style={{ width: COLS * CW - GAP, height: ROWS * CH - GAP, position: 'relative' }}>
+      <div style={{ position: 'absolute', top: -offsetY, left: -offsetX, width: (COLS + 2) * CW, height: (ROWS + 2) * CH, pointerEvents: 'none' }}>
+        {items.map((item, i) => {
+          const { col, row } = visualPos[i]
+          const x = offsetX + col * CW
+          const y = offsetY + row * CH
+          const skip = noTrans.has(i)
+          return (
+            <a
+              key={item.label}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="grid-tag"
+              style={{
+                width: CW - GAP,
+                height: CH - GAP,
+                transform: `translate(${x}px, ${y}px)`,
+                transition: skip ? 'none' : `transform ${ANIM_MS}ms cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s, color 0.2s`,
+                pointerEvents: 'auto',
+              }}
+            >
+              {item.label}
+            </a>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -136,7 +186,7 @@ const contentLines = [
   { type: 'experience', role: 'co-founder', place: 'circle of champions', date: '2024–2025' },
   { type: 'experience', role: 'co-founder', place: 'klein business academy', date: '2023–2025' },
   { text: '' },
-  { type: 'section-label', text: 'high school projects' },
+  { type: 'section-label', text: 'cool projects' },
   { type: 'experience', role: 'impossiball', place: 'unity/c# game', date: '2018', href: 'https://agent-tiger.github.io/ImpossiBall/' },
   { type: 'experience', role: 'king of the hill', place: 'multiplayer game', date: '2019', href: 'https://agent-tiger.github.io/KingofHillWebsite/' },
   { text: '' },
@@ -164,8 +214,8 @@ function useTypewriter(lines) {
   const [showSkip, setShowSkip] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSkip(true), 2000)
-    return () => clearTimeout(timer)
+    const t = setTimeout(() => setShowSkip(true), 2000)
+    return () => clearTimeout(t)
   }, [])
 
   const skip = useCallback(() => {
@@ -177,9 +227,9 @@ function useTypewriter(lines) {
 
   useEffect(() => {
     if (isDone) return
-    const handler = (e) => { if (e.key === 'Enter') skip() }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    const h = (e) => { if (e.key === 'Enter') skip() }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
   }, [isDone, skip])
 
   useEffect(() => {
@@ -189,31 +239,31 @@ function useTypewriter(lines) {
     }
     const line = lines[lineIndex]
     const text = line.text || ''
-    const instantTypes = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'sliding-grid']
-    if (!text || instantTypes.includes(line.type)) {
+    const instant = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'sliding-grid']
+    if (!text || instant.includes(line.type)) {
       const delay = line.type === 'section-label' ? SECTION_PAUSE : LINE_PAUSE
-      const timer = setTimeout(() => {
-        setVisibleLines(prev => [...prev, line])
-        setLineIndex(prev => prev + 1)
+      const t = setTimeout(() => {
+        setVisibleLines(p => [...p, line])
+        setLineIndex(p => p + 1)
         setCharIndex(0)
         setCurrentText('')
       }, delay)
-      return () => clearTimeout(timer)
+      return () => clearTimeout(t)
     }
     if (charIndex < text.length) {
-      const timer = setTimeout(() => {
+      const t = setTimeout(() => {
         setCurrentText(text.slice(0, charIndex + 1))
-        setCharIndex(prev => prev + 1)
+        setCharIndex(p => p + 1)
       }, TYPE_DELAY)
-      return () => clearTimeout(timer)
+      return () => clearTimeout(t)
     }
-    const timer = setTimeout(() => {
-      setVisibleLines(prev => [...prev, line])
-      setLineIndex(prev => prev + 1)
+    const t = setTimeout(() => {
+      setVisibleLines(p => [...p, line])
+      setLineIndex(p => p + 1)
       setCharIndex(0)
       setCurrentText('')
     }, LINE_PAUSE)
-    return () => clearTimeout(timer)
+    return () => clearTimeout(t)
   }, [lineIndex, charIndex, isDone, lines])
 
   return { visibleLines, currentText, isDone, showSkip, skip }
@@ -222,16 +272,10 @@ function useTypewriter(lines) {
 /* ── Line renderer ──────────────────────────────────── */
 function Line({ line, index }) {
   const instantTypes = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'sliding-grid']
-  if (!line.text && !instantTypes.includes(line.type)) {
-    return <div className="line-spacer" />
-  }
+  if (!line.text && !instantTypes.includes(line.type)) return <div className="line-spacer" />
 
   if (line.type === 'section-label') {
-    return (
-      <div className="line line-section muted" style={{ animationDelay: `${index * 30}ms` }}>
-        {line.text}
-      </div>
-    )
+    return <div className="line line-section muted" style={{ animationDelay: `${index * 30}ms` }}>{line.text}</div>
   }
 
   if (line.type === 'experience') {
@@ -245,11 +289,9 @@ function Line({ line, index }) {
     )
     return (
       <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
-        {line.href ? (
-          <a href={line.href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', textDecoration: 'none' }}>
-            {content}
-          </a>
-        ) : content}
+        {line.href
+          ? <a href={line.href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', textDecoration: 'none' }}>{content}</a>
+          : content}
       </div>
     )
   }
@@ -257,9 +299,7 @@ function Line({ line, index }) {
   if (line.type === 'cv-button') {
     return (
       <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
-        <a href="/Hamza_Usman_Resume.pdf" download className="cv-button">
-          ↓ download cv
-        </a>
+        <a href="/Hamza_Usman_Resume.pdf" download className="cv-button">↓ download cv</a>
       </div>
     )
   }
@@ -281,7 +321,7 @@ function Line({ line, index }) {
 
   if (line.type === 'sliding-grid') {
     return (
-      <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
+      <div className="line sliding-grid-wrapper" style={{ animationDelay: `${index * 30}ms` }}>
         <SlidingGrid items={line.items} />
       </div>
     )
@@ -290,9 +330,7 @@ function Line({ line, index }) {
   if (line.type === 'contact') {
     return (
       <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
-        <a href={line.href} style={{ textDecoration: 'underline', textDecorationColor: '#ececec' }}>
-          {line.text}
-        </a>
+        <a href={line.href} style={{ textDecoration: 'underline', textDecorationColor: '#ececec' }}>{line.text}</a>
       </div>
     )
   }
@@ -306,19 +344,15 @@ function Line({ line, index }) {
     )
   }
 
-  return (
-    <div className="line muted" style={{ animationDelay: `${index * 30}ms` }}>
-      {line.text}
-    </div>
-  )
+  return <div className="line muted" style={{ animationDelay: `${index * 30}ms` }}>{line.text}</div>
 }
 
 /* ── Clock ──────────────────────────────────────────── */
 function Clock() {
   const [now, setNow] = useState(new Date())
   useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 1000)
-    return () => clearInterval(interval)
+    const i = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(i)
   }, [])
   const pad = (n) => String(n).padStart(2, '0')
   const opts = { timeZone: 'America/Chicago', hour12: false }
@@ -353,32 +387,20 @@ function App() {
         <div className="header-name">hamza usman</div>
         <div className="header-subtitle">business + finance @ ut austin</div>
       </header>
-
       <main className="main">
         <div className="content">
-          {visibleLines.map((line, i) => (
-            <Line key={i} line={line} index={i} />
-          ))}
-
+          {visibleLines.map((line, i) => <Line key={i} line={line} index={i} />)}
           {!isDone && currentText && (
-            <div className="line muted" style={{ opacity: 1, transform: 'none' }}>
-              {currentText}
-            </div>
+            <div className="line muted" style={{ opacity: 1, transform: 'none' }}>{currentText}</div>
           )}
-
           {!isDone && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div className="cursor" />
-              {showSkip && (
-                <button className="skip-hint" onClick={skip}>
-                  press enter to skip
-                </button>
-              )}
+              {showSkip && <button className="skip-hint" onClick={skip}>press enter to skip</button>}
             </div>
           )}
         </div>
       </main>
-
       {isDone && (
         <footer className="footer">
           <div className="footer-links">
