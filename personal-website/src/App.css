@@ -284,131 +284,106 @@
   color: var(--text-primary);
 }
 
-/* ============ PROJECTS ============ */
-.projects-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+/* ============ EXPERIENCE ============ */
+.exp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.project-card {
+.exp-card {
   background: var(--bg-card);
   border: 1px solid var(--accent-border);
-  border-radius: var(--radius-lg);
-  padding: 36px;
+  border-radius: var(--radius-md);
+  padding: 24px 28px;
   transition: var(--transition-medium);
   position: relative;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 20px;
+  align-items: start;
+  border-left: 2px solid transparent;
 }
 
-.project-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--accent-gradient);
-  opacity: 0;
-  transition: opacity var(--transition-medium);
-}
-
-.project-card:hover {
+.exp-card:hover {
   background: var(--bg-card-hover);
-  border-color: var(--accent-silver-dim);
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-color: var(--accent-border);
+  border-left-color: var(--accent-silver);
+  transform: translateX(4px);
 }
 
-.project-card:hover::before {
-  opacity: 1;
-}
-
-.project-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.project-icon {
-  width: 48px;
-  height: 48px;
+.exp-icon {
+  width: 44px;
+  height: 44px;
   background: var(--accent-glow);
   border: 1px solid var(--accent-border);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
-.project-links {
+.exp-body {
+  min-width: 0;
+}
+
+.exp-top-row {
   display: flex;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 4px;
 }
 
-.project-links a {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  transition: color var(--transition-fast);
-}
-
-.project-links a:hover {
-  color: var(--accent-silver-light);
-}
-
-.project-title {
+.exp-title {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 12px;
 }
 
-.project-desc {
-  font-size: 0.9rem;
+.exp-date {
+  font-size: 0.72rem;
+  color: var(--accent-silver-dim);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.exp-org {
+  font-size: 0.82rem;
+  color: var(--accent-silver-dim);
+  margin-bottom: 8px;
+}
+
+.exp-desc {
+  font-size: 0.85rem;
   color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 24px;
+  line-height: 1.65;
   font-weight: 300;
+  margin-bottom: 10px;
 }
 
-.project-tech {
+.exp-tech {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tech-tag {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--accent-silver-dim);
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
-.tech-tag::before {
-  content: '▹ ';
-}
-
-/* Feature project (spans full width) */
-.project-card.featured {
-  grid-column: span 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-}
-
-.project-card.featured .project-preview {
-  background: var(--bg-secondary);
+  background: rgba(192, 192, 208, 0.06);
+  padding: 3px 10px;
+  border-radius: 100px;
   border: 1px solid var(--accent-border);
-  border-radius: var(--radius-md);
-  height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  opacity: 0.5;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 /* ============ RESUME / CS SECTION ============ */
@@ -606,17 +581,13 @@
     gap: 40px;
   }
 
-  .projects-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .project-card.featured {
-    grid-column: span 1;
-    grid-template-columns: 1fr;
-  }
-
   .hero-decoration {
     display: none;
+  }
+
+  .exp-top-row {
+    flex-direction: column;
+    gap: 2px;
   }
 }
 

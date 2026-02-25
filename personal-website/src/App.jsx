@@ -15,14 +15,15 @@ function App() {
       icon: '🏦',
       title: 'Tech Investment Banking Intern',
       org: 'Concordia Capital · Remote',
+      date: 'Dec 2025 — Present',
       desc: 'Supporting buyside tech M&A deal execution through financial modeling, industry research, and sourcing. Evaluated 75+ companies across Video Game Marketing and B2B Enterprise AI, presenting acquisition targets.',
       tech: ['Financial Modeling', 'M&A', 'Industry Research', 'Deal Execution'],
-      featured: true,
     },
     {
       icon: '🛍️',
       title: 'Founder',
       org: 'Organic Roots · Houston, TX',
+      date: 'Apr 2024 — Aug 2024',
       desc: 'Launched a Shopify store for handmade traditional Pakistani clothing, building site architecture and payment integration. Generated $10K+ in revenue via targeted Facebook/Instagram campaigns.',
       tech: ['Shopify', 'E-Commerce', 'Digital Marketing', 'Entrepreneurship'],
     },
@@ -30,6 +31,7 @@ function App() {
       icon: '📚',
       title: 'Private Tutor',
       org: 'AP SAT Tutorial · Spring, TX',
+      date: 'Dec 2020 — Dec 2023',
       desc: 'Tutored 15+ students in SAT/ACT, Calculus, Physics, and Algebra, contributing to an average score increase of 15%. Led 7 students to score top 5% nationally and gain ~$400K in scholarships.',
       tech: ['Teaching', 'Curriculum Design', 'SAT/ACT', 'STEM'],
     },
@@ -37,6 +39,7 @@ function App() {
       icon: '🎮',
       title: 'Android Game Developer',
       org: 'Impossiball & King of the Hill · Spring, TX',
+      date: 'Jan 2018 — Nov 2018',
       desc: 'Developed and published 2 original Android/Web games in C# and Unity, generating over 150 downloads and impressions. Managed full app design lifecycle from testing to publication.',
       tech: ['C#', 'Unity', 'Game Design', 'Android'],
     },
@@ -115,8 +118,8 @@ function App() {
               <a href="#experience" className="btn-primary">
                 View Experience ↓
               </a>
-              <a href="#contact" className="btn-secondary">
-                Get in Touch
+              <a href="/Hamza_Usman_Resume.pdf" download className="btn-secondary">
+                Download CV ↓
               </a>
             </div>
           </div>
@@ -186,26 +189,21 @@ function App() {
         <div className="container">
           <span className="section-label animate-in">Work</span>
           <h2 className="section-title animate-in">Experience</h2>
-          <div className="projects-grid">
+          <div className="exp-list">
             {experiences.map((exp, i) => (
               <div
                 key={exp.title}
-                className={`project-card animate-in animate-delay-${i % 4 + 1} ${exp.featured ? 'featured' : ''
-                  }`}
+                className={`exp-card animate-in animate-delay-${i % 4 + 1}`}
               >
-                {exp.featured && (
-                  <div className="project-preview">{exp.icon}</div>
-                )}
-                <div>
-                  <div className="project-header">
-                    {!exp.featured && (
-                      <div className="project-icon">{exp.icon}</div>
-                    )}
+                <div className="exp-icon">{exp.icon}</div>
+                <div className="exp-body">
+                  <div className="exp-top-row">
+                    <span className="exp-title">{exp.title}</span>
+                    <span className="exp-date">{exp.date}</span>
                   </div>
-                  <h3 className="project-title">{exp.title}</h3>
-                  <p className="timeline-org" style={{ marginBottom: '12px' }}>{exp.org}</p>
-                  <p className="project-desc">{exp.desc}</p>
-                  <div className="project-tech">
+                  <div className="exp-org">{exp.org}</div>
+                  <div className="exp-desc">{exp.desc}</div>
+                  <div className="exp-tech">
                     {exp.tech.map((t) => (
                       <span key={t} className="tech-tag">{t}</span>
                     ))}
@@ -336,6 +334,7 @@ function App() {
               <a href="https://linkedin.com/in/hamzausman7/" className="contact-link" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
               <a href="tel:+13463754079" className="contact-link">Call ↗</a>
               <a href="mailto:hamzausman@utexas.edu" className="contact-link">Email ↗</a>
+              <a href="/Hamza_Usman_Resume.pdf" download className="contact-link">Resume ↓</a>
             </div>
           </div>
         </div>
