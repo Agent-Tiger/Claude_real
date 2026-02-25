@@ -197,21 +197,164 @@
 
 /* ── QUOTE SECTION ── */
 .quote-section {
-  margin-top: 1rem;
-  padding: 1rem 0;
+  padding: 0.5rem 0 0.25rem;
+  text-align: center;
 }
 
 .quote-text {
-  font-size: 0.95rem;
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.2rem;
   color: var(--text-secondary);
   font-style: italic;
-  line-height: 1.6;
+  line-height: 1.7;
+  letter-spacing: 0.015em;
 }
 
 .quote-attr {
-  font-size: 0.8rem;
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.85rem;
   color: var(--text-muted);
   margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* ── CV BUTTON ── */
+.cv-button {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: calc(0.5rem - 2px);
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--text-muted) !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.cv-button:hover {
+  background-color: var(--hover-bg);
+  border-color: var(--text-secondary);
+  color: var(--text-primary) !important;
+}
+
+/* ── EDUCATION BLOCK ── */
+.education-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.edu-logo {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  opacity: 0.9;
+}
+
+.edu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.edu-degree {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.edu-school {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.edu-detail {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ── INTERESTS GRID ── */
+.interests-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.interest-tag {
+  display: inline-block;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: calc(0.5rem - 2px);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.interest-tag:hover {
+  background-color: var(--hover-bg);
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+/* 4 gentle drift variants */
+@keyframes drift0 {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+
+  50% {
+    transform: translateY(-3px) translateX(2px);
+  }
+
+  100% {
+    transform: translateY(2px) translateX(-1px);
+  }
+}
+
+@keyframes drift1 {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+
+  50% {
+    transform: translateY(3px) translateX(-2px);
+  }
+
+  100% {
+    transform: translateY(-2px) translateX(2px);
+  }
+}
+
+@keyframes drift2 {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+
+  50% {
+    transform: translateY(-2px) translateX(-3px);
+  }
+
+  100% {
+    transform: translateY(3px) translateX(1px);
+  }
+}
+
+@keyframes drift3 {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+
+  50% {
+    transform: translateY(2px) translateX(3px);
+  }
+
+  100% {
+    transform: translateY(-3px) translateX(-2px);
+  }
 }
 
 /* ── FOOTER ── */
