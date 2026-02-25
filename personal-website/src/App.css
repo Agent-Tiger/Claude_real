@@ -272,89 +272,49 @@
   color: var(--text-muted);
 }
 
-/* ── INTERESTS GRID ── */
-.interests-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
+/* ── EDU LOGO IMAGE ── */
+.edu-logo-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  opacity: 0.9;
+  /* tint to burnt orange */
+  filter: brightness(0) saturate(100%) invert(33%) sepia(87%) saturate(600%) hue-rotate(1deg) brightness(95%) contrast(101%);
 }
 
-.interest-tag {
-  display: inline-block;
-  padding: 0.3rem 0.65rem;
+/* ── SLIDING GRID ── */
+.sliding-grid {
+  overflow: visible;
+  margin: 0.5rem 0;
+}
+
+.grid-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 0.75rem;
   border: 1px solid var(--border);
   border-radius: calc(0.5rem - 2px);
   font-size: 0.8rem;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 0.85s cubic-bezier(0.45, 0, 0.55, 1),
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
-.interest-tag:hover {
+.grid-tag:hover {
   background-color: var(--hover-bg);
   border-color: var(--text-secondary);
   color: var(--text-primary);
-}
-
-/* 4 gentle drift variants */
-@keyframes drift0 {
-  0% {
-    transform: translateY(0px) translateX(0px);
-  }
-
-  50% {
-    transform: translateY(-3px) translateX(2px);
-  }
-
-  100% {
-    transform: translateY(2px) translateX(-1px);
-  }
-}
-
-@keyframes drift1 {
-  0% {
-    transform: translateY(0px) translateX(0px);
-  }
-
-  50% {
-    transform: translateY(3px) translateX(-2px);
-  }
-
-  100% {
-    transform: translateY(-2px) translateX(2px);
-  }
-}
-
-@keyframes drift2 {
-  0% {
-    transform: translateY(0px) translateX(0px);
-  }
-
-  50% {
-    transform: translateY(-2px) translateX(-3px);
-  }
-
-  100% {
-    transform: translateY(3px) translateX(1px);
-  }
-}
-
-@keyframes drift3 {
-  0% {
-    transform: translateY(0px) translateX(0px);
-  }
-
-  50% {
-    transform: translateY(2px) translateX(3px);
-  }
-
-  100% {
-    transform: translateY(-3px) translateX(-2px);
-  }
 }
 
 /* ── FOOTER ── */

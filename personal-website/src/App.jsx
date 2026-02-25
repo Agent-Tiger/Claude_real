@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import longhornsLogo from './assets/longhorns.png'
 import './App.css'
 
-/* ── Interests data ─────────────────────────────────── */
-const interests = [
+/* ── All interests + languages in one list ─────────── */
+const allTags = [
   { label: 'chai making', href: 'https://en.wikipedia.org/wiki/Masala_chai' },
   { label: 'arabic calligraphy', href: 'https://en.wikipedia.org/wiki/Arabic_calligraphy' },
   { label: 'thrifting', href: 'https://en.wikipedia.org/wiki/Thrift_store' },
@@ -11,9 +12,7 @@ const interests = [
   { label: 'soccer', href: 'https://en.wikipedia.org/wiki/Association_football' },
   { label: 'boxing', href: 'https://en.wikipedia.org/wiki/Boxing' },
   { label: 'vlogging', href: 'https://en.wikipedia.org/wiki/Vlog' },
-]
-
-const languages = [
+  { label: 'running', href: 'https://en.wikipedia.org/wiki/Running' },
   { label: 'urdu', href: 'https://en.wikipedia.org/wiki/Urdu' },
   { label: 'hindi', href: 'https://en.wikipedia.org/wiki/Hindi' },
   { label: 'punjabi', href: 'https://en.wikipedia.org/wiki/Punjabi_language' },
@@ -22,10 +21,102 @@ const languages = [
   { label: 'spanish ↗', href: 'https://en.wikipedia.org/wiki/Spanish_language' },
 ]
 
+/* ── 3×5 Sliding Grid ──────────────────────────────── */
+const COLS = 5
+const ROWS = 3
+const CELL_W = 128   // px, including gap
+const CELL_H = 44    // px, including gap
+const GAP = 8
+
+function SlidingGrid({ items }) {
+  // positions[i] = {col, row} — where each item currently sits
+  const [positions, setPositions] = useState(() =>
+    items.map((_, i) => ({ col: i % COLS, row: Math.floor(i / COLS) }))
+  )
+
+  const intervalRef = useRef(null)
+
+  useEffect(() => {
+    function doSwap() {
+      setPositions(prev => {
+        const next = prev.map(p => ({ ...p }))
+        // Pick a random item and a random neighbour direction
+        const idx = Math.floor(Math.random() * items.length)
+        const dirs = [
+          { dc: 1, dr: 0 }, { dc: -1, dr: 0 },
+          { dc: 0, dr: 1 }, { dc: 0, dr: -1 },
+        ]
+        const dir = dirs[Math.floor(Math.random() * dirs.length)]
+        const newCol = next[idx].col + dir.dc
+        const newRow = next[idx].row + dir.dr
+
+        // Allow one cell outside grid temporarily
+        if (newCol < -1 || newCol > COLS || newRow < -1 || newRow > ROWS) return prev
+
+        // Find if another item occupies target cell (within grid)
+        const targetIdx = next.findIndex(
+          (p, j) => j !== idx && p.col === newCol && p.row === newRow
+        )
+        // Swap (or just move if target is outside main grid bounds)
+        if (targetIdx !== -1) {
+          // swap positions
+          const tmp = { ...next[idx] }
+          next[idx] = { ...next[targetIdx] }
+          next[targetIdx] = tmp
+        } else {
+          // move freely (temporarily outside grid)
+          next[idx] = { col: newCol, row: newRow }
+        }
+        return next
+      })
+    }
+
+    // stagger: fire swaps on an irregular cadence
+    function scheduleNext() {
+      const delay = 600 + Math.random() * 1000
+      intervalRef.current = setTimeout(() => {
+        doSwap()
+        scheduleNext()
+      }, delay)
+    }
+    scheduleNext()
+    return () => clearTimeout(intervalRef.current)
+  }, [items.length])
+
+  const gridW = COLS * (CELL_W - GAP) + GAP
+  const gridH = ROWS * (CELL_H - GAP) + GAP
+
+  return (
+    <div
+      className="sliding-grid"
+      style={{ width: gridW, height: gridH, position: 'relative' }}
+    >
+      {items.map((item, i) => {
+        const { col, row } = positions[i]
+        const x = col * CELL_W
+        const y = row * CELL_H
+        return (
+          <a
+            key={item.label}
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="grid-tag"
+            style={{
+              transform: `translate(${x}px, ${y}px)`,
+              width: CELL_W - GAP,
+            }}
+          >
+            {item.label}
+          </a>
+        )
+      })}
+    </div>
+  )
+}
+
 /* ── Content lines ──────────────────────────────────── */
 const contentLines = [
-  { text: 'business + finance @ ut austin.' },
-  { text: '' },
   { type: 'quote', text: '"slow is smooth, smooth is fast."', attr: '— russell sarre' },
   { text: '' },
   { text: 'investment banking, venture capital, and building from the ground up.' },
@@ -53,10 +144,7 @@ const contentLines = [
   { type: 'education' },
   { text: '' },
   { type: 'section-label', text: 'etc.' },
-  { type: 'interests-grid', items: interests },
-  { text: '' },
-  { type: 'section-label', text: 'languages' },
-  { type: 'interests-grid', items: languages },
+  { type: 'sliding-grid', items: allTags },
   { text: '' },
   { text: '' },
   { type: 'contact', text: 'say hello →', href: 'mailto:hamzausman@utexas.edu' },
@@ -101,7 +189,7 @@ function useTypewriter(lines) {
     }
     const line = lines[lineIndex]
     const text = line.text || ''
-    const instantTypes = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'interests-grid']
+    const instantTypes = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'sliding-grid']
     if (!text || instantTypes.includes(line.type)) {
       const delay = line.type === 'section-label' ? SECTION_PAUSE : LINE_PAUSE
       const timer = setTimeout(() => {
@@ -131,39 +219,9 @@ function useTypewriter(lines) {
   return { visibleLines, currentText, isDone, showSkip, skip }
 }
 
-/* ── Animated Interests Grid ──────────────────────────── */
-// Generates gentle random CSS animation names per-item using a seed
-function InterestsGrid({ items }) {
-  return (
-    <div className="interests-grid">
-      {items.map((item, i) => {
-        const delay = (i * 0.37 + (i % 3) * 0.2).toFixed(2)
-        const duration = (3.5 + (i % 4) * 0.8).toFixed(2)
-        const animIdx = i % 4  // 4 drift variants
-        return (
-          <a
-            key={item.label}
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="interest-tag"
-            style={{
-              animationDelay: `${delay}s`,
-              animationDuration: `${duration}s`,
-              animationName: `drift${animIdx}`,
-            }}
-          >
-            {item.label}
-          </a>
-        )
-      })}
-    </div>
-  )
-}
-
 /* ── Line renderer ──────────────────────────────────── */
 function Line({ line, index }) {
-  const instantTypes = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'interests-grid']
+  const instantTypes = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'sliding-grid']
   if (!line.text && !instantTypes.includes(line.type)) {
     return <div className="line-spacer" />
   }
@@ -210,27 +268,7 @@ function Line({ line, index }) {
     return (
       <div className="line education-block" style={{ animationDelay: `${index * 30}ms` }}>
         <div className="edu-logo">
-          {/* UT Austin official-style logo */}
-          <svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="47" stroke="#BF5700" strokeWidth="3.5" fill="none" />
-            {/* Longhorn silhouette path (simplified) */}
-            <g fill="#BF5700" transform="translate(50,50)">
-              {/* Left horn */}
-              <path d="M-20,-18 C-30,-28 -38,-22 -34,-14 C-30,-6 -22,-10 -18,-14 Z" />
-              {/* Right horn */}
-              <path d="M20,-18 C30,-28 38,-22 34,-14 C30,-6 22,-10 18,-14 Z" />
-              {/* Head */}
-              <ellipse cx="0" cy="-4" rx="17" ry="14" />
-              {/* Nose */}
-              <ellipse cx="0" cy="8" rx="11" ry="7" />
-              {/* Nostrils */}
-              <ellipse cx="-4" cy="10" rx="2.5" ry="1.5" fill="#0e0e17" />
-              <ellipse cx="4" cy="10" rx="2.5" ry="1.5" fill="#0e0e17" />
-              {/* Eyes */}
-              <circle cx="-7" cy="-8" r="2.5" fill="#0e0e17" />
-              <circle cx="7" cy="-8" r="2.5" fill="#0e0e17" />
-            </g>
-          </svg>
+          <img src={longhornsLogo} alt="UT Austin" className="edu-logo-img" />
         </div>
         <div className="edu-text">
           <div className="edu-degree">b.b.a. — canfield business honors</div>
@@ -241,10 +279,10 @@ function Line({ line, index }) {
     )
   }
 
-  if (line.type === 'interests-grid') {
+  if (line.type === 'sliding-grid') {
     return (
       <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
-        <InterestsGrid items={line.items} />
+        <SlidingGrid items={line.items} />
       </div>
     )
   }
