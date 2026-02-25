@@ -231,85 +231,6 @@ function InstagramIcon() {
   )
 }
 
-/* ── Chatbot component ────────────────────────────── */
-function Chatbot() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState([
-    { role: 'bot', text: 'sup. ask me anything ig.' }
-  ])
-  const [input, setInput] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-  const scrollRef = useRef(null)
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
-
-  const getResponse = (query) => {
-    const q = query.toLowerCase()
-    if (q.includes('who are you') || q.includes('hamza')) return 'thats hamza. student at ut. likes finance n stuff.'
-    if (q.includes('project') || q.includes('work')) return 'check the list above. hes busy.'
-    if (q.includes('hobby') || q.includes('guitar')) return 'he plays guitar. slow is smooth etc.'
-    if (q.includes('joke')) return 'my existence is the joke.'
-    if (q.includes('help')) return 'idk man figure it out.'
-    if (q.includes('hi') || q.includes('hello')) return 'yo.'
-    return 'cool story.'
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!input.trim() || isTyping) return
-
-    const userMsg = { role: 'user', text: input.toLowerCase() }
-    setMessages(prev => [...prev, userMsg])
-    setInput('')
-    setIsTyping(true)
-
-    setTimeout(() => {
-      const botMsg = { role: 'bot', text: getResponse(input) }
-      setMessages(prev => [...prev, botMsg])
-      setIsTyping(false)
-    }, 600)
-  }
-
-  return (
-    <div className={`chatbot ${isOpen ? 'open' : ''}`}>
-      {!isOpen ? (
-        <button className="chat-toggle" onClick={() => setIsOpen(true)}>
-          <span className="dot active" /> ask ai
-        </button>
-      ) : (
-        <div className="chat-window">
-          <div className="chat-header">
-            <span>hamza.ai</span>
-            <button onClick={() => setIsOpen(false)}>_</button>
-          </div>
-          <div className="chat-messages" ref={scrollRef}>
-            {messages.map((m, i) => (
-              <div key={i} className={`msg ${m.role}`}>
-                <span className="msg-pre">{m.role === 'bot' ? '>' : '$'}</span>
-                {m.text}
-              </div>
-            ))}
-            {isTyping && <div className="msg bot typing">...</div>}
-          </div>
-          <form className="chat-input-form" onSubmit={handleSubmit}>
-            <span className="input-pre">$</span>
-            <input
-              autoFocus
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="type here..."
-            />
-          </form>
-        </div>
-      )}
-    </div>
-  )
-}
-
 /* ── Main App ───────────────────────────────────────── */
 function App() {
   const { visibleLines, currentText, isDone, showSkip, skip } = useTypewriter(contentLines)
@@ -365,8 +286,6 @@ function App() {
           </div>
         </footer>
       )}
-
-      <Chatbot />
     </div>
   )
 }
