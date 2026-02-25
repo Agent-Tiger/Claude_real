@@ -1,12 +1,47 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import './App.css'
 
+/* ── Scroll-reveal hook ──────────────────────────── */
+function useReveal() {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('visible')
+          observer.unobserve(el)
+        }
+      },
+      { threshold: 0.12 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return ref
+}
+
+/* Wrapper component for reveal */
+function Reveal({ children, className = '', delay = 0 }) {
+  const ref = useReveal()
+  return (
+    <div ref={ref} className={`reveal ${delay ? `reveal-delay-${delay}` : ''} ${className}`}>
+      {children}
+    </div>
+  )
+}
+
+/* ── Main App ────────────────────────────────────── */
 function App() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -18,6 +53,14 @@ function App() {
       date: 'Dec 2025 — Present',
       desc: 'Supporting buyside tech M&A deal execution through financial modeling, industry research, and sourcing. Evaluated 75+ companies across Video Game Marketing and B2B Enterprise AI, presenting acquisition targets.',
       tech: ['Financial Modeling', 'M&A', 'Industry Research', 'Deal Execution'],
+    },
+    {
+      icon: '🍝',
+      title: 'Expeditor (Expo)',
+      org: 'Mia Bella Trattoria · Spring, TX',
+      date: 'Sep 2024 — Dec 2024',
+      desc: 'Delivered high-volume service to 130+ patrons per shift while focusing on customer satisfaction and consistent order output. Coordinated with kitchen and floor staff to manage 25+ tables and guarantee delivery within 30 minutes.',
+      tech: ['Hospitality', 'Operations', 'Team Coordination'],
     },
     {
       icon: '🛍️',
@@ -88,7 +131,7 @@ function App() {
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="container">
           <a href="#" className="nav-logo">
-            hamza<span className="dot">.</span>
+            Hamza<span className="dot">.</span>
           </a>
           <ul className="nav-links">
             <li><a href="#about">About</a></li>
@@ -103,133 +146,154 @@ function App() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* ────── HERO ────── */}
       <section className="hero section" id="hero">
         <div className="container">
-          <div className="hero-content animate-in">
-            <p className="hero-greeting">Hello, I'm</p>
-            <h1 className="hero-name shimmer-text">Hamza Usman.</h1>
-            <p className="hero-tagline">
-              Business &amp; finance student at UT Austin with a passion for
-              investment banking, venture capital, and building things from the
-              ground up.
-            </p>
-            <div className="hero-cta-group">
-              <a href="#experience" className="btn-primary">
-                View Experience ↓
-              </a>
-              <a href="/Hamza_Usman_Resume.pdf" download className="btn-secondary">
-                Download CV ↓
-              </a>
+          <Reveal>
+            <div className="hero-content">
+              <p className="hero-greeting">Hello, I'm</p>
+              <h1 className="hero-name shimmer-text">Hamza Usman.</h1>
+              <p className="hero-tagline">
+                Business &amp; finance student at UT Austin with a passion for
+                investment banking, venture capital, and building things from the
+                ground up.
+              </p>
+              <div className="hero-cta-group">
+                <a href="#experience" className="btn-primary">
+                  View Experience ↓
+                </a>
+                <a href="/Hamza_Usman_Resume.pdf" download className="btn-secondary">
+                  Download CV ↓
+                </a>
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
         <div className="hero-decoration" />
+        <div className="hero-scroll-indicator">
+          <span>scroll</span>
+          <div className="scroll-line" />
+        </div>
       </section>
 
-      {/* About */}
+      <hr className="section-divider" />
+
+      {/* ────── ABOUT ────── */}
       <section className="section" id="about">
         <div className="container">
-          <span className="section-label animate-in">About Me</span>
-          <h2 className="section-title animate-in">
-            Finance meets hustle.
-          </h2>
+          <Reveal>
+            <span className="section-label">About Me</span>
+            <h2 className="section-title">Finance meets hustle.</h2>
+          </Reveal>
           <div className="about-grid">
-            <div className="about-text animate-in animate-delay-1">
-              <p>
-                I'm a student at <strong>The University of Texas at Austin</strong>,
-                pursuing a Bachelor of Business Administration in the Canfield
-                Business Honors program with a Certificate in Programming &amp;
-                Computation. I hold a 4.00/4.00 GPA and University Honors.
-              </p>
-              <p>
-                My experience spans tech investment banking at Concordia Capital,
-                founding an e-commerce brand, venture capital analysis, and
-                building communities from the ground up. I thrive at the
-                intersection of finance, technology, and entrepreneurship.
-              </p>
-              <p>
-                Outside of work, you'll find me making chai, practicing Arabic
-                calligraphy, playing chess or guitar, caring for my 8 stray cats,
-                or out on the soccer field.
-              </p>
-              <div className="skills-list">
-                {['Excel', 'FactSet', 'Pitchbook', 'CrunchBase', 'PowerPoint',
-                  'VS Code', 'Financial Modeling', 'Valuation', 'DCFs'].map(
-                    (skill) => (
-                      <span key={skill} className="skill-tag">{skill}</span>
-                    )
-                  )}
+            <Reveal delay={1}>
+              <div className="about-text">
+                <p>
+                  I'm a student at <strong>The University of Texas at Austin</strong>,
+                  pursuing a Bachelor of Business Administration in the Canfield
+                  Business Honors program with a Certificate in Programming &amp;
+                  Computation. I hold a 4.00/4.00 GPA and University Honors.
+                </p>
+                <p>
+                  My experience spans tech investment banking at Concordia Capital,
+                  founding an e-commerce brand, venture capital analysis, and
+                  building communities from the ground up. I thrive at the
+                  intersection of finance, technology, and entrepreneurship.
+                </p>
+                <p>
+                  Outside of work, you'll find me making chai, practicing Arabic
+                  calligraphy, playing chess or guitar, caring for my 8 stray cats,
+                  or out on the soccer field.
+                </p>
+                <div className="skills-list">
+                  {['Excel', 'FactSet', 'Pitchbook', 'CrunchBase', 'PowerPoint',
+                    'VS Code', 'Financial Modeling', 'Valuation', 'DCFs'].map(
+                      (skill) => (
+                        <span key={skill} className="skill-tag">{skill}</span>
+                      )
+                    )}
+                </div>
               </div>
-            </div>
-            <div className="about-stats animate-in animate-delay-2">
-              <div className="stat-card">
-                <div className="stat-number">4.00</div>
-                <div className="stat-label">GPA</div>
+            </Reveal>
+            <Reveal delay={2}>
+              <div className="about-stats">
+                <div className="stat-card">
+                  <div className="stat-number">4.00</div>
+                  <div className="stat-label">GPA</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number">75+</div>
+                  <div className="stat-label">Companies Sourced</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number">$10K+</div>
+                  <div className="stat-label">Revenue Generated</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number">6</div>
+                  <div className="stat-label">Languages Spoken</div>
+                </div>
               </div>
-              <div className="stat-card">
-                <div className="stat-number">75+</div>
-                <div className="stat-label">Companies Sourced</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">$10K+</div>
-                <div className="stat-label">Revenue Generated</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">6</div>
-                <div className="stat-label">Languages Spoken</div>
-              </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Experience */}
+      <hr className="section-divider" />
+
+      {/* ────── EXPERIENCE ────── */}
       <section className="section" id="experience">
         <div className="container">
-          <span className="section-label animate-in">Work</span>
-          <h2 className="section-title animate-in">Experience</h2>
+          <Reveal>
+            <span className="section-label">Work</span>
+            <h2 className="section-title">Experience</h2>
+          </Reveal>
           <div className="exp-list">
             {experiences.map((exp, i) => (
-              <div
-                key={exp.title}
-                className={`exp-card animate-in animate-delay-${i % 4 + 1}`}
-              >
-                <div className="exp-icon">{exp.icon}</div>
-                <div className="exp-body">
-                  <div className="exp-top-row">
-                    <span className="exp-title">{exp.title}</span>
-                    <span className="exp-date">{exp.date}</span>
-                  </div>
-                  <div className="exp-org">{exp.org}</div>
-                  <div className="exp-desc">{exp.desc}</div>
-                  <div className="exp-tech">
-                    {exp.tech.map((t) => (
-                      <span key={t} className="tech-tag">{t}</span>
-                    ))}
+              <Reveal key={exp.title} delay={Math.min(i + 1, 5)}>
+                <div className="exp-card">
+                  <div className="exp-icon">{exp.icon}</div>
+                  <div className="exp-body">
+                    <div className="exp-top-row">
+                      <span className="exp-title">{exp.title}</span>
+                      <span className="exp-date">{exp.date}</span>
+                    </div>
+                    <div className="exp-org">{exp.org}</div>
+                    <div className="exp-desc">{exp.desc}</div>
+                    <div className="exp-tech">
+                      {exp.tech.map((t) => (
+                        <span key={t} className="tech-tag">{t}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Leadership */}
+      <hr className="section-divider" />
+
+      {/* ────── LEADERSHIP ────── */}
       <section className="section" id="leadership">
         <div className="container">
-          <span className="section-label animate-in">Leadership</span>
-          <h2 className="section-title animate-in">Activities &amp; Organizations</h2>
+          <Reveal>
+            <span className="section-label">Leadership</span>
+            <h2 className="section-title">Activities &amp; Organizations</h2>
+          </Reveal>
           <div className="resume-content" style={{ gridTemplateColumns: '1fr' }}>
-            <div className="resume-column animate-in animate-delay-1">
+            <div className="resume-column">
               <div className="timeline">
-                {leadership.map((item) => (
-                  <div key={item.org} className="timeline-item">
-                    <div className="timeline-date">{item.date}</div>
-                    <div className="timeline-title">{item.role}</div>
-                    <div className="timeline-org">{item.org}</div>
-                    <div className="timeline-desc">{item.desc}</div>
-                  </div>
+                {leadership.map((item, i) => (
+                  <Reveal key={item.org} delay={Math.min(i + 1, 5)}>
+                    <div className="timeline-item">
+                      <div className="timeline-date">{item.date}</div>
+                      <div className="timeline-title">{item.role}</div>
+                      <div className="timeline-org">{item.org}</div>
+                      <div className="timeline-desc">{item.desc}</div>
+                    </div>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -237,106 +301,124 @@ function App() {
         </div>
       </section>
 
-      {/* Resume / CV */}
+      <hr className="section-divider" />
+
+      {/* ────── RESUME / CV ────── */}
       <section className="section" id="resume">
         <div className="container">
-          <span className="section-label animate-in">Curriculum Vitae</span>
-          <h2 className="section-title animate-in">Education &amp; Skills</h2>
+          <Reveal>
+            <span className="section-label">Curriculum Vitae</span>
+            <h2 className="section-title">Education &amp; Skills</h2>
+          </Reveal>
           <div className="resume-content">
-            <div className="resume-column animate-in animate-delay-1">
-              <h3>Education</h3>
-              <div className="timeline">
-                <div className="timeline-item">
-                  <div className="timeline-date">2025 — 2029</div>
-                  <div className="timeline-title">
-                    B.B.A., Canfield Business Honors
-                  </div>
-                  <div className="timeline-org">
-                    The University of Texas at Austin
-                  </div>
-                  <div className="timeline-desc">
-                    Certificate: Programming &amp; Computation · GPA: 4.00/4.00
-                    · University Honors (Fall 2025 — Spring 2026)
+            <Reveal delay={1}>
+              <div className="resume-column">
+                <h3>Education</h3>
+                <div className="timeline">
+                  <div className="timeline-item">
+                    <div className="timeline-date">2025 — 2029</div>
+                    <div className="timeline-title">
+                      B.B.A., Canfield Business Honors
+                    </div>
+                    <div className="timeline-org">
+                      The University of Texas at Austin
+                    </div>
+                    <div className="timeline-desc">
+                      Certificate: Programming &amp; Computation · GPA: 4.00/4.00
+                      · University Honors (Fall 2025 — Spring 2026)
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <h3 style={{ marginTop: '36px' }}>Honors</h3>
-              <div className="timeline">
-                <div className="timeline-item">
-                  <div className="timeline-date">Spring 2026</div>
-                  <div className="timeline-title">Texas Stock Pitch Competition (PLOW)</div>
-                  <div className="timeline-desc">Qualified</div>
-                </div>
-                <div className="timeline-item">
-                  <div className="timeline-date">Spring 2025</div>
-                  <div className="timeline-title">UGA Stock Pitch Competition (FISV)</div>
-                  <div className="timeline-desc">Qualified</div>
-                </div>
-                <div className="timeline-item">
-                  <div className="timeline-date">Spring 2022 — Spring 2025</div>
-                  <div className="timeline-title">DECA ICDC Qualifier &amp; State Finalist</div>
-                  <div className="timeline-desc">Financial Operations Research</div>
-                </div>
-              </div>
-            </div>
-            <div className="resume-column animate-in animate-delay-2">
-              <h3>Skills</h3>
-              <div className="skills-grid">
-                <div className="skill-item">
-                  <div className="skill-item-title">Technical</div>
-                  <div className="skill-item-list">
-                    Excel, FactSet, Pitchbook, CrunchBase, PowerPoint, VS Code, Cursor
+                <h3 style={{ marginTop: '32px' }}>Honors</h3>
+                <div className="timeline">
+                  <div className="timeline-item">
+                    <div className="timeline-date">Spring 2026</div>
+                    <div className="timeline-title">Texas Stock Pitch Competition (PLOW)</div>
+                    <div className="timeline-desc">Qualified</div>
                   </div>
-                </div>
-                <div className="skill-item">
-                  <div className="skill-item-title">Finance</div>
-                  <div className="skill-item-list">
-                    Financial Modeling, Valuation, DCFs, 3-Statement Models, M&amp;A
+                  <div className="timeline-item">
+                    <div className="timeline-date">Spring 2025</div>
+                    <div className="timeline-title">UGA Stock Pitch Competition (FISV)</div>
+                    <div className="timeline-desc">Qualified</div>
                   </div>
-                </div>
-                <div className="skill-item">
-                  <div className="skill-item-title">Languages</div>
-                  <div className="skill-item-list">
-                    Urdu (Native), Hindi &amp; Punjabi (Advanced), Hindko, Arabic, Spanish (Conversational)
-                  </div>
-                </div>
-                <div className="skill-item">
-                  <div className="skill-item-title">Interests</div>
-                  <div className="skill-item-list">
-                    Chai Making, Arabic Calligraphy, Thrifting, Chess, Guitar, Soccer, Boxing, Running, Vlogging
+                  <div className="timeline-item">
+                    <div className="timeline-date">Spring 2022 — Spring 2025</div>
+                    <div className="timeline-title">DECA ICDC Qualifier &amp; State Finalist</div>
+                    <div className="timeline-desc">Financial Operations Research</div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
+            <Reveal delay={2}>
+              <div className="resume-column">
+                <h3>Skills</h3>
+                <div className="skills-grid">
+                  <div className="skill-item">
+                    <div className="skill-item-title">Technical</div>
+                    <div className="skill-item-list">
+                      Excel, FactSet, Pitchbook, CrunchBase, PowerPoint, VS Code, Cursor
+                    </div>
+                  </div>
+                  <div className="skill-item">
+                    <div className="skill-item-title">Finance</div>
+                    <div className="skill-item-list">
+                      Financial Modeling, Valuation, DCFs, 3-Statement Models, M&amp;A
+                    </div>
+                  </div>
+                  <div className="skill-item">
+                    <div className="skill-item-title">Languages</div>
+                    <div className="skill-item-list">
+                      Urdu (Native), Hindi &amp; Punjabi (Advanced), Hindko, Arabic, Spanish (Conversational)
+                    </div>
+                  </div>
+                  <div className="skill-item">
+                    <div className="skill-item-title">Interests</div>
+                    <div className="skill-item-list">
+                      Chai Making, Arabic Calligraphy, Thrifting, Chess, Guitar, Soccer, Boxing, Running, Vlogging
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                  <a href="/Hamza_Usman_Resume.pdf" download className="btn-primary" style={{ fontSize: '0.78rem' }}>
+                    Download Full Resume ↓
+                  </a>
+                </div>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Contact */}
+      <hr className="section-divider" />
+
+      {/* ────── CONTACT ────── */}
       <section className="section" id="contact">
         <div className="container">
-          <div className="contact-content animate-in">
-            <span className="section-label" style={{ justifyContent: 'center' }}>
-              Contact
-            </span>
-            <h2 className="section-title" style={{ textAlign: 'center' }}>
-              Let's Connect
-            </h2>
-            <p>
-              I'm always open to discussing new opportunities, interesting
-              projects, or just connecting with fellow driven people.
-            </p>
-            <a href="mailto:hamzausman@utexas.edu" className="btn-primary">
-              Say Hello →
-            </a>
-            <div className="contact-links">
-              <a href="https://linkedin.com/in/hamzausman7/" className="contact-link" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
-              <a href="tel:+13463754079" className="contact-link">Call ↗</a>
-              <a href="mailto:hamzausman@utexas.edu" className="contact-link">Email ↗</a>
-              <a href="/Hamza_Usman_Resume.pdf" download className="contact-link">Resume ↓</a>
+          <Reveal>
+            <div className="contact-content">
+              <span className="section-label" style={{ justifyContent: 'center' }}>
+                Contact
+              </span>
+              <h2 className="section-title" style={{ textAlign: 'center' }}>
+                Let's Connect
+              </h2>
+              <p>
+                I'm always open to discussing new opportunities, interesting
+                projects, or just connecting with fellow driven people.
+              </p>
+              <a href="mailto:hamzausman@utexas.edu" className="btn-primary">
+                Say Hello →
+              </a>
+              <div className="contact-links">
+                <a href="https://linkedin.com/in/hamzausman7/" className="contact-link" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+                <a href="tel:+13463754079" className="contact-link">Call ↗</a>
+                <a href="mailto:hamzausman@utexas.edu" className="contact-link">Email ↗</a>
+                <a href="/Hamza_Usman_Resume.pdf" download className="contact-link">Resume ↓</a>
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
