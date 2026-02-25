@@ -26,8 +26,8 @@ const contentLines = [
   { text: 'co-founder of klein business academy — taught financial literacy to 30+ students.' },
   { text: '' },
   { type: 'section-label', text: 'high school projects' },
-  { type: 'experience', role: 'impossiball', place: 'unity/c# game', date: '2018', href: 'https://github.com/Agent-Tiger/ImpossiBall' },
-  { type: 'experience', role: 'king of the hill', place: 'multiplayer game', date: '2019', href: 'https://github.com/Agent-Tiger/KOHMultiplayer' },
+  { type: 'experience', role: 'impossiball', place: 'unity/c# game', date: '2018', href: 'https://agent-tiger.github.io/ImpossiBall/' },
+  { type: 'experience', role: 'king of the hill', place: 'multiplayer game', date: '2019', href: 'https://agent-tiger.github.io/KingofHillWebsite/' },
   { text: '' },
   { type: 'section-label', text: 'education' },
   { text: 'b.b.a., canfield business honors — the university of texas at austin (2025–2029).' },
@@ -223,6 +223,14 @@ function XIcon() {
   )
 }
 
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12s.014 3.667.072 4.947c.2 4.352 2.622 6.774 6.98 6.974 1.28.058 1.688.072 4.948.072 3.26 0 3.668-.014 4.948-.072 4.354-.2 6.774-2.622 6.974-6.98.058-1.28.072-1.688.072-4.947s-.014-3.667-.072-4.947c-.2-4.353-2.622-6.775-6.974-6.975-1.28-.058-1.688-.072-4.948-.072zM12 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+    </svg>
+  )
+}
+
 /* ── Main App ───────────────────────────────────────── */
 function App() {
   const { visibleLines, currentText, isDone, showSkip, skip } = useTypewriter(contentLines)
@@ -269,8 +277,11 @@ function App() {
             <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="github">
               <GitHubIcon />
             </a>
-            <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="x">
+            <a href="https://x.com/hamza777usman" target="_blank" rel="noopener noreferrer" aria-label="x">
               <XIcon />
+            </a>
+            <a href="https://instagram.com/just_hamzau" target="_blank" rel="noopener noreferrer" aria-label="instagram">
+              <InstagramIcon />
             </a>
           </div>
         </footer>
