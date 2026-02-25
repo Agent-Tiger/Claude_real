@@ -1,31 +1,22 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 
 /* ── Scroll-reveal hook ──────────────────────────── */
 function useReveal() {
   const ref = useRef(null)
-
   useEffect(() => {
     const el = ref.current
     if (!el) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('visible')
-          observer.unobserve(el)
-        }
-      },
-      { threshold: 0.12 }
+    const io = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { el.classList.add('visible'); io.unobserve(el) } },
+      { threshold: 0.1 }
     )
-    observer.observe(el)
-    return () => observer.disconnect()
+    io.observe(el)
+    return () => io.disconnect()
   }, [])
-
   return ref
 }
 
-/* Wrapper component for reveal */
 function Reveal({ children, className = '', delay = 0 }) {
   const ref = useReveal()
   return (
@@ -35,12 +26,22 @@ function Reveal({ children, className = '', delay = 0 }) {
   )
 }
 
+/* ── Marquee items ────────────────────────────────── */
+const marqueeWords = [
+  'Investment Banking', 'Venture Capital', 'Financial Modeling',
+  'Entrepreneurship', 'M&A', 'Valuation', 'DCFs',
+  'E-Commerce', 'Leadership', 'UT Austin',
+  'Investment Banking', 'Venture Capital', 'Financial Modeling',
+  'Entrepreneurship', 'M&A', 'Valuation', 'DCFs',
+  'E-Commerce', 'Leadership', 'UT Austin',
+]
+
 /* ── Main App ────────────────────────────────────── */
 function App() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
+    const onScroll = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -56,7 +57,7 @@ function App() {
     },
     {
       icon: '🍝',
-      title: 'Expeditor (Expo)',
+      title: 'Expeditor',
       org: 'Mia Bella Trattoria · Spring, TX',
       date: 'Sep 2024 — Dec 2024',
       desc: 'Delivered high-volume service to 130+ patrons per shift while focusing on customer satisfaction and consistent order output. Coordinated with kitchen and floor staff to manage 25+ tables and guarantee delivery within 30 minutes.',
@@ -123,15 +124,14 @@ function App() {
 
   return (
     <>
-      {/* Background orbs */}
       <div className="bg-orb bg-orb-1" />
       <div className="bg-orb bg-orb-2" />
 
-      {/* Navbar */}
+      {/* ─── NAVBAR ─── */}
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="container">
           <a href="#" className="nav-logo">
-            Hamza<span className="dot">.</span>
+            HU<span className="dot">.</span>
           </a>
           <ul className="nav-links">
             <li><a href="#about">About</a></li>
@@ -146,43 +146,51 @@ function App() {
         </div>
       </nav>
 
-      {/* ────── HERO ────── */}
-      <section className="hero section" id="hero">
-        <div className="container">
+      {/* ─── HERO ─── */}
+      <section className="hero" id="hero">
+        <div className="hero-inner">
           <Reveal>
-            <div className="hero-content">
-              <p className="hero-greeting">Hello, I'm</p>
-              <h1 className="hero-name shimmer-text">Hamza Usman.</h1>
+            <p className="hero-greeting">Portfolio · 2026</p>
+            <h1 className="hero-name">
+              <span className="hero-name-row shimmer-text">Hamza</span>
+              <span className="hero-name-row italic">Usman</span>
+            </h1>
+            <div className="hero-bottom">
               <p className="hero-tagline">
-                Business &amp; finance student at UT Austin with a passion for
-                investment banking, venture capital, and building things from the
-                ground up.
+                Business &amp; finance student at UT Austin —
+                investment banking, venture capital, and building
+                from the ground up.
               </p>
               <div className="hero-cta-group">
-                <a href="#experience" className="btn-primary">
-                  View Experience ↓
-                </a>
-                <a href="/Hamza_Usman_Resume.pdf" download className="btn-secondary">
-                  Download CV ↓
-                </a>
+                <a href="#experience" className="btn-primary">Explore ↓</a>
+                <a href="/Hamza_Usman_Resume.pdf" download className="btn-secondary">Download CV</a>
               </div>
             </div>
           </Reveal>
         </div>
-        <div className="hero-decoration" />
         <div className="hero-scroll-indicator">
-          <span>scroll</span>
+          <span>Scroll</span>
           <div className="scroll-line" />
         </div>
       </section>
 
-      <hr className="section-divider" />
+      {/* ─── MARQUEE ─── */}
+      <div className="marquee-wrapper">
+        <div className="marquee-track">
+          {marqueeWords.map((word, i) => (
+            <span key={i} className="marquee-item">
+              {word}
+              <span className="marquee-dot" />
+            </span>
+          ))}
+        </div>
+      </div>
 
-      {/* ────── ABOUT ────── */}
+      {/* ─── ABOUT ─── */}
       <section className="section" id="about">
         <div className="container">
           <Reveal>
-            <span className="section-label">About Me</span>
+            <span className="section-label">About</span>
             <h2 className="section-title">Finance meets hustle.</h2>
           </Reveal>
           <div className="about-grid">
@@ -192,13 +200,16 @@ function App() {
                   I'm a student at <strong>The University of Texas at Austin</strong>,
                   pursuing a Bachelor of Business Administration in the Canfield
                   Business Honors program with a Certificate in Programming &amp;
-                  Computation. I hold a 4.00/4.00 GPA and University Honors.
+                  Computation.
                 </p>
+                <div className="highlight-quote">
+                  "I thrive at the intersection of finance, technology, and
+                  entrepreneurship."
+                </div>
                 <p>
                   My experience spans tech investment banking at Concordia Capital,
                   founding an e-commerce brand, venture capital analysis, and
-                  building communities from the ground up. I thrive at the
-                  intersection of finance, technology, and entrepreneurship.
+                  building communities from the ground up.
                 </p>
                 <p>
                   Outside of work, you'll find me making chai, practicing Arabic
@@ -207,7 +218,7 @@ function App() {
                 </p>
                 <div className="skills-list">
                   {['Excel', 'FactSet', 'Pitchbook', 'CrunchBase', 'PowerPoint',
-                    'VS Code', 'Financial Modeling', 'Valuation', 'DCFs'].map(
+                    'Financial Modeling', 'Valuation', 'DCFs', 'VS Code'].map(
                       (skill) => (
                         <span key={skill} className="skill-tag">{skill}</span>
                       )
@@ -227,11 +238,11 @@ function App() {
                 </div>
                 <div className="stat-card">
                   <div className="stat-number">$10K+</div>
-                  <div className="stat-label">Revenue Generated</div>
+                  <div className="stat-label">Revenue</div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-number">6</div>
-                  <div className="stat-label">Languages Spoken</div>
+                  <div className="stat-label">Languages</div>
                 </div>
               </div>
             </Reveal>
@@ -241,7 +252,7 @@ function App() {
 
       <hr className="section-divider" />
 
-      {/* ────── EXPERIENCE ────── */}
+      {/* ─── EXPERIENCE ─── */}
       <section className="section" id="experience">
         <div className="container">
           <Reveal>
@@ -252,19 +263,19 @@ function App() {
             {experiences.map((exp, i) => (
               <Reveal key={exp.title} delay={Math.min(i + 1, 5)}>
                 <div className="exp-card">
-                  <div className="exp-icon">{exp.icon}</div>
-                  <div className="exp-body">
-                    <div className="exp-top-row">
+                  <div className="exp-top-row">
+                    <div className="exp-title-group">
+                      <span className="exp-icon">{exp.icon}</span>
                       <span className="exp-title">{exp.title}</span>
-                      <span className="exp-date">{exp.date}</span>
                     </div>
-                    <div className="exp-org">{exp.org}</div>
-                    <div className="exp-desc">{exp.desc}</div>
-                    <div className="exp-tech">
-                      {exp.tech.map((t) => (
-                        <span key={t} className="tech-tag">{t}</span>
-                      ))}
-                    </div>
+                    <span className="exp-date">{exp.date}</span>
+                  </div>
+                  <div className="exp-org">{exp.org}</div>
+                  <div className="exp-desc">{exp.desc}</div>
+                  <div className="exp-tech">
+                    {exp.tech.map((t) => (
+                      <span key={t} className="tech-tag">{t}</span>
+                    ))}
                   </div>
                 </div>
               </Reveal>
@@ -275,7 +286,7 @@ function App() {
 
       <hr className="section-divider" />
 
-      {/* ────── LEADERSHIP ────── */}
+      {/* ─── LEADERSHIP ─── */}
       <section className="section" id="leadership">
         <div className="container">
           <Reveal>
@@ -303,11 +314,11 @@ function App() {
 
       <hr className="section-divider" />
 
-      {/* ────── RESUME / CV ────── */}
+      {/* ─── RESUME ─── */}
       <section className="section" id="resume">
         <div className="container">
           <Reveal>
-            <span className="section-label">Curriculum Vitae</span>
+            <span className="section-label">CV</span>
             <h2 className="section-title">Education &amp; Skills</h2>
           </Reveal>
           <div className="resume-content">
@@ -317,20 +328,15 @@ function App() {
                 <div className="timeline">
                   <div className="timeline-item">
                     <div className="timeline-date">2025 — 2029</div>
-                    <div className="timeline-title">
-                      B.B.A., Canfield Business Honors
-                    </div>
-                    <div className="timeline-org">
-                      The University of Texas at Austin
-                    </div>
+                    <div className="timeline-title">B.B.A., Canfield Business Honors</div>
+                    <div className="timeline-org">The University of Texas at Austin</div>
                     <div className="timeline-desc">
                       Certificate: Programming &amp; Computation · GPA: 4.00/4.00
-                      · University Honors (Fall 2025 — Spring 2026)
+                      · University Honors
                     </div>
                   </div>
                 </div>
-
-                <h3 style={{ marginTop: '32px' }}>Honors</h3>
+                <h3 style={{ marginTop: '28px' }}>Honors</h3>
                 <div className="timeline">
                   <div className="timeline-item">
                     <div className="timeline-date">Spring 2026</div>
@@ -343,7 +349,7 @@ function App() {
                     <div className="timeline-desc">Qualified</div>
                   </div>
                   <div className="timeline-item">
-                    <div className="timeline-date">Spring 2022 — Spring 2025</div>
+                    <div className="timeline-date">2022 — 2025</div>
                     <div className="timeline-title">DECA ICDC Qualifier &amp; State Finalist</div>
                     <div className="timeline-desc">Financial Operations Research</div>
                   </div>
@@ -369,19 +375,18 @@ function App() {
                   <div className="skill-item">
                     <div className="skill-item-title">Languages</div>
                     <div className="skill-item-list">
-                      Urdu (Native), Hindi &amp; Punjabi (Advanced), Hindko, Arabic, Spanish (Conversational)
+                      Urdu (Native), Hindi &amp; Punjabi (Advanced), Hindko, Arabic, Spanish
                     </div>
                   </div>
                   <div className="skill-item">
                     <div className="skill-item-title">Interests</div>
                     <div className="skill-item-list">
-                      Chai Making, Arabic Calligraphy, Thrifting, Chess, Guitar, Soccer, Boxing, Running, Vlogging
+                      Chai Making, Arabic Calligraphy, Thrifting, Chess, Guitar, Soccer, Boxing, Vlogging
                     </div>
                   </div>
                 </div>
-
                 <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                  <a href="/Hamza_Usman_Resume.pdf" download className="btn-primary" style={{ fontSize: '0.78rem' }}>
+                  <a href="/Hamza_Usman_Resume.pdf" download className="btn-primary">
                     Download Full Resume ↓
                   </a>
                 </div>
@@ -393,7 +398,7 @@ function App() {
 
       <hr className="section-divider" />
 
-      {/* ────── CONTACT ────── */}
+      {/* ─── CONTACT ─── */}
       <section className="section" id="contact">
         <div className="container">
           <Reveal>
@@ -401,12 +406,12 @@ function App() {
               <span className="section-label" style={{ justifyContent: 'center' }}>
                 Contact
               </span>
-              <h2 className="section-title" style={{ textAlign: 'center' }}>
-                Let's Connect
+              <h2 className="contact-title">
+                Let's build<br />something together.
               </h2>
               <p>
-                I'm always open to discussing new opportunities, interesting
-                projects, or just connecting with fellow driven people.
+                Always open to new opportunities, interesting projects,
+                and connecting with driven people.
               </p>
               <a href="mailto:hamzausman@utexas.edu" className="btn-primary">
                 Say Hello →
@@ -422,12 +427,9 @@ function App() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="container">
-          <p>
-            Designed & built by Hamza Usman · {new Date().getFullYear()}
-          </p>
+          <p>Hamza Usman · {new Date().getFullYear()}</p>
         </div>
       </footer>
     </>
