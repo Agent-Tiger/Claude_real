@@ -1,438 +1,270 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import './App.css'
 
-/* ── Scroll-reveal hook ──────────────────────────── */
-function useReveal() {
-  const ref = useRef(null)
+/* ── Content lines (all lowercase) ──────────────────── */
+const contentLines = [
+  { text: 'hamza usman.' },
+  { text: '' },
+  { text: 'business & finance student at ut austin. i like investment banking, venture capital, and building from the ground up.' },
+  { text: '' },
+  { text: 'currently interning in tech investment banking and scouting early-stage startups for vc funds.' },
+  { text: 'previously founded an e-commerce brand, tutored 15+ students, and built android games.' },
+  { text: '' },
+  { text: '' },
+  { type: 'section-label', text: 'where i\'ve been' },
+  { type: 'experience', role: 'tech ib intern', place: 'concordia capital', date: '2025–now' },
+  { type: 'experience', role: 'founder', place: 'organic roots', date: '2024' },
+  { type: 'experience', role: 'expeditor', place: 'mia bella trattoria', date: '2024' },
+  { type: 'experience', role: 'private tutor', place: 'ap sat tutorial', date: '2020–2023' },
+  { type: 'experience', role: 'game developer', place: 'impossiball', date: '2018' },
+  { text: '' },
+  { type: 'section-label', text: 'things i do on campus' },
+  { text: 'junior analyst at texas venture group — scouting early-stage companies for top vc partners.' },
+  { text: 'junior analyst at texas capital collective — selected as 1 of 7 members (<5% acceptance).' },
+  { text: 'general analyst at university securities investment team — pitching to a $50k+ portfolio.' },
+  { text: 'co-founder of circle of champions — built a network across 12+ houston schools.' },
+  { text: 'co-founder of klein business academy — taught financial literacy to 30+ students.' },
+  { text: '' },
+  { type: 'section-label', text: 'education' },
+  { text: 'b.b.a., canfield business honors — the university of texas at austin (2025–2029).' },
+  { text: 'certificate in programming & computation · gpa: 4.00/4.00 · university honors.' },
+  { text: '' },
+  { type: 'section-label', text: 'etc.' },
+  { text: 'into chai making, arabic calligraphy, thrifting, chess, guitar, soccer, boxing, and vlogging.' },
+  { text: 'fluent in urdu, hindi, punjabi, hindko. learning arabic and spanish.' },
+  { text: '' },
+  { type: 'quote', text: '"slow is smooth, smooth is fast."', attr: '— my guitar teacher' },
+  { text: '' },
+  { text: '' },
+  { type: 'contact', text: 'say hello →', href: 'mailto:hamzausman@utexas.edu' },
+]
+
+/* ── Typewriter hook ────────────────────────────────── */
+const TYPE_DELAY = 40
+const LINE_PAUSE = 180
+const SECTION_PAUSE = 350
+
+function useTypewriter(lines) {
+  const [visibleLines, setVisibleLines] = useState([])
+  const [currentText, setCurrentText] = useState('')
+  const [lineIndex, setLineIndex] = useState(0)
+  const [charIndex, setCharIndex] = useState(0)
+  const [isDone, setIsDone] = useState(false)
+  const [showSkip, setShowSkip] = useState(false)
+
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const io = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { el.classList.add('visible'); io.unobserve(el) } },
-      { threshold: 0.1 }
-    )
-    io.observe(el)
-    return () => io.disconnect()
+    const timer = setTimeout(() => setShowSkip(true), 2000)
+    return () => clearTimeout(timer)
   }, [])
-  return ref
+
+  const skip = useCallback(() => {
+    setVisibleLines(lines)
+    setCurrentText('')
+    setIsDone(true)
+    setShowSkip(false)
+  }, [lines])
+
+  // enter key to skip
+  useEffect(() => {
+    if (isDone) return
+    const handler = (e) => { if (e.key === 'Enter') skip() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [isDone, skip])
+
+  // typing engine
+  useEffect(() => {
+    if (isDone || lineIndex >= lines.length) {
+      if (lineIndex >= lines.length) setIsDone(true)
+      return
+    }
+
+    const line = lines[lineIndex]
+    const text = line.text || ''
+
+    // instant lines (empty, experience, section-label, contact, quote)
+    if (!text || line.type === 'experience' || line.type === 'section-label' || line.type === 'contact' || line.type === 'quote') {
+      const delay = line.type === 'section-label' ? SECTION_PAUSE : LINE_PAUSE
+      const timer = setTimeout(() => {
+        setVisibleLines(prev => [...prev, line])
+        setLineIndex(prev => prev + 1)
+        setCharIndex(0)
+        setCurrentText('')
+      }, delay)
+      return () => clearTimeout(timer)
+    }
+
+    // character-by-character typing
+    if (charIndex < text.length) {
+      const timer = setTimeout(() => {
+        setCurrentText(text.slice(0, charIndex + 1))
+        setCharIndex(prev => prev + 1)
+      }, TYPE_DELAY)
+      return () => clearTimeout(timer)
+    }
+
+    // line complete
+    const timer = setTimeout(() => {
+      setVisibleLines(prev => [...prev, line])
+      setLineIndex(prev => prev + 1)
+      setCharIndex(0)
+      setCurrentText('')
+    }, LINE_PAUSE)
+    return () => clearTimeout(timer)
+  }, [lineIndex, charIndex, isDone, lines])
+
+  return { visibleLines, currentText, isDone, showSkip, skip }
 }
 
-function Reveal({ children, className = '', delay = 0 }) {
-  const ref = useReveal()
+/* ── Line renderer ──────────────────────────────────── */
+function Line({ line, index }) {
+  if (!line.text && line.type !== 'experience' && line.type !== 'section-label' && line.type !== 'contact' && line.type !== 'quote') {
+    return <div className="line-spacer" style={{ animationDelay: `${index * 30}ms` }} />
+  }
+
+  if (line.type === 'section-label') {
+    return (
+      <div className="line line-section muted" style={{ animationDelay: `${index * 30}ms` }}>
+        {line.text}
+      </div>
+    )
+  }
+
+  if (line.type === 'experience') {
+    return (
+      <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
+        <div className="experience-item">
+          <span className="experience-dot" />
+          <span className="experience-role">{line.role}</span>
+          <span className="experience-place">@ {line.place}</span>
+          <span className="experience-date">{line.date}</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (line.type === 'contact') {
+    return (
+      <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
+        <a href={line.href} style={{ textDecoration: 'underline', textDecorationColor: '#ececec' }}>
+          {line.text}
+        </a>
+      </div>
+    )
+  }
+
+  if (line.type === 'quote') {
+    return (
+      <div className="line quote-section" style={{ animationDelay: `${index * 30}ms` }}>
+        <div className="quote-text">{line.text}</div>
+        {line.attr && <div className="quote-attr">{line.attr}</div>}
+      </div>
+    )
+  }
+
   return (
-    <div ref={ref} className={`reveal ${delay ? `reveal-delay-${delay}` : ''} ${className}`}>
-      {children}
+    <div className="line muted" style={{ animationDelay: `${index * 30}ms` }}>
+      {line.text}
     </div>
   )
 }
 
-/* ── Marquee items ────────────────────────────────── */
-const marqueeWords = [
-  'Investment Banking', 'Venture Capital', 'Financial Modeling',
-  'Entrepreneurship', 'M&A', 'Valuation', 'DCFs',
-  'E-Commerce', 'Leadership', 'UT Austin',
-  'Investment Banking', 'Venture Capital', 'Financial Modeling',
-  'Entrepreneurship', 'M&A', 'Valuation', 'DCFs',
-  'E-Commerce', 'Leadership', 'UT Austin',
-]
-
-/* ── Main App ────────────────────────────────────── */
-function App() {
-  const [scrolled, setScrolled] = useState(false)
+/* ── Clock component ────────────────────────────────── */
+function Clock() {
+  const [now, setNow] = useState(new Date())
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const interval = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(interval)
   }, [])
 
-  const experiences = [
-    {
-      icon: '🏦',
-      title: 'Tech Investment Banking Intern',
-      org: 'Concordia Capital · Remote',
-      date: 'Dec 2025 — Present',
-      desc: 'Supporting buyside tech M&A deal execution through financial modeling, industry research, and sourcing. Evaluated 75+ companies across Video Game Marketing and B2B Enterprise AI, presenting acquisition targets.',
-      tech: ['Financial Modeling', 'M&A', 'Industry Research', 'Deal Execution'],
-    },
-    {
-      icon: '🍝',
-      title: 'Expeditor',
-      org: 'Mia Bella Trattoria · Spring, TX',
-      date: 'Sep 2024 — Dec 2024',
-      desc: 'Delivered high-volume service to 130+ patrons per shift while focusing on customer satisfaction and consistent order output. Coordinated with kitchen and floor staff to manage 25+ tables and guarantee delivery within 30 minutes.',
-      tech: ['Hospitality', 'Operations', 'Team Coordination'],
-    },
-    {
-      icon: '🛍️',
-      title: 'Founder',
-      org: 'Organic Roots · Houston, TX',
-      date: 'Apr 2024 — Aug 2024',
-      desc: 'Launched a Shopify store for handmade traditional Pakistani clothing, building site architecture and payment integration. Generated $10K+ in revenue via targeted Facebook/Instagram campaigns.',
-      tech: ['Shopify', 'E-Commerce', 'Digital Marketing', 'Entrepreneurship'],
-    },
-    {
-      icon: '📚',
-      title: 'Private Tutor',
-      org: 'AP SAT Tutorial · Spring, TX',
-      date: 'Dec 2020 — Dec 2023',
-      desc: 'Tutored 15+ students in SAT/ACT, Calculus, Physics, and Algebra, contributing to an average score increase of 15%. Led 7 students to score top 5% nationally and gain ~$400K in scholarships.',
-      tech: ['Teaching', 'Curriculum Design', 'SAT/ACT', 'STEM'],
-    },
-    {
-      icon: '🎮',
-      title: 'Android Game Developer',
-      org: 'Impossiball & King of the Hill · Spring, TX',
-      date: 'Jan 2018 — Nov 2018',
-      desc: 'Developed and published 2 original Android/Web games in C# and Unity, generating over 150 downloads and impressions. Managed full app design lifecycle from testing to publication.',
-      tech: ['C#', 'Unity', 'Game Design', 'Android'],
-    },
-  ]
+  const pad = (n) => String(n).padStart(2, '0')
+  const opts = { timeZone: 'America/Chicago', hour12: false }
+  const h = pad(now.toLocaleString('en-US', { ...opts, hour: 'numeric' }).replace(/^24$/, '00'))
+  const m = pad(now.toLocaleString('en-US', { ...opts, minute: 'numeric' }))
+  const s = pad(now.toLocaleString('en-US', { ...opts, second: 'numeric' }))
 
-  const leadership = [
-    {
-      role: 'Junior Analyst',
-      org: 'Texas Venture Group',
-      date: 'Spring 2026 — Present',
-      desc: 'Identified early-stage companies with scalable ARR and founder-market fit for partners (a16z, RRE, 8VC). Researched investment thesis around AI-driven fintech segments.',
-    },
-    {
-      role: 'Junior Analyst',
-      org: 'Texas Capital Collective',
-      date: 'Fall 2025 — Present',
-      desc: 'Selected as 1 of 7 members (<5% acceptance) for a finance organization. Completed 20-hour technical curriculum covering accounting, valuation, modeling; built 3-statement models and DCFs.',
-    },
-    {
-      role: 'General Analyst',
-      org: 'University Securities Investment Team',
-      date: 'Fall 2025 — Present',
-      desc: 'Pitched DLO and AGYS to meetings of 100+ members for contribution to a $50k+ long/short public equities portfolio through analyst groups and stock pitches.',
-    },
-    {
-      role: 'Co-Founder',
-      org: 'Circle of Champions',
-      date: 'Fall 2024 — Summer 2025',
-      desc: 'Built a network across 12+ Houston-area schools and organized 70+ attendees for multiple religious and social events. Secured over 2k of funding in grants and operating capital.',
-    },
-    {
-      role: 'Co-Founder',
-      org: 'Klein Business Academy',
-      date: 'Summer 2023 — Summer 2025',
-      desc: 'Taught financial literacy and business fundamentals to 30+ students via 3-month workshops. Grew engagement and impressions over 500% through outreach and social media campaigns.',
-    },
-  ]
+  return <div className="clock">{h}:{m}:{s} cst</div>
+}
+
+/* ── SVG icons ──────────────────────────────────────── */
+function GitHubIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+    </svg>
+  )
+}
+
+function LinkedInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  )
+}
+
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  )
+}
+
+/* ── Main App ───────────────────────────────────────── */
+function App() {
+  const { visibleLines, currentText, isDone, showSkip, skip } = useTypewriter(contentLines)
 
   return (
-    <>
-      <div className="bg-orb bg-orb-1" />
-      <div className="bg-orb bg-orb-2" />
+    <div className="app">
+      <header className="header">
+        <Clock />
+        <div className="header-name">hamza usman</div>
+        <div className="header-subtitle">student at ut austin</div>
+      </header>
 
-      {/* ─── NAVBAR ─── */}
-      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-        <div className="container">
-          <a href="#" className="nav-logo">
-            HU<span className="dot">.</span>
-          </a>
-          <ul className="nav-links">
-            <li><a href="#about">About</a></li>
-            <li><a href="#experience">Experience</a></li>
-            <li><a href="#leadership">Leadership</a></li>
-            <li><a href="#resume">Resume</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-          <button className="nav-toggle" aria-label="Toggle menu">
-            <span /><span /><span />
-          </button>
-        </div>
-      </nav>
-
-      {/* ─── HERO ─── */}
-      <section className="hero" id="hero">
-        <div className="hero-inner">
-          <Reveal>
-            <p className="hero-greeting">Portfolio · 2026</p>
-            <h1 className="hero-name">
-              <span className="hero-name-row shimmer-text">Hamza</span>
-              <span className="hero-name-row italic">Usman</span>
-            </h1>
-            <div className="hero-bottom">
-              <p className="hero-tagline">
-                Business &amp; finance student at UT Austin —
-                investment banking, venture capital, and building
-                from the ground up.
-              </p>
-              <div className="hero-cta-group">
-                <a href="#experience" className="btn-primary">Explore ↓</a>
-                <a href="/Hamza_Usman_Resume.pdf" download className="btn-secondary">Download CV</a>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-        <div className="hero-scroll-indicator">
-          <span>Scroll</span>
-          <div className="scroll-line" />
-        </div>
-      </section>
-
-      {/* ─── MARQUEE ─── */}
-      <div className="marquee-wrapper">
-        <div className="marquee-track">
-          {marqueeWords.map((word, i) => (
-            <span key={i} className="marquee-item">
-              {word}
-              <span className="marquee-dot" />
-            </span>
+      <main className="main">
+        <div className="content">
+          {visibleLines.map((line, i) => (
+            <Line key={i} line={line} index={i} />
           ))}
-        </div>
-      </div>
 
-      {/* ─── ABOUT ─── */}
-      <section className="section" id="about">
-        <div className="container">
-          <Reveal>
-            <span className="section-label">About</span>
-            <h2 className="section-title">Finance meets hustle.</h2>
-          </Reveal>
-          <div className="about-grid">
-            <Reveal delay={1}>
-              <div className="about-text">
-                <p>
-                  I'm a student at <strong>The University of Texas at Austin</strong>,
-                  pursuing a Bachelor of Business Administration in the Canfield
-                  Business Honors program with a Certificate in Programming &amp;
-                  Computation.
-                </p>
-                <div className="highlight-quote">
-                  "I thrive at the intersection of finance, technology, and
-                  entrepreneurship."
-                </div>
-                <p>
-                  My experience spans tech investment banking at Concordia Capital,
-                  founding an e-commerce brand, venture capital analysis, and
-                  building communities from the ground up.
-                </p>
-                <p>
-                  Outside of work, you'll find me making chai, practicing Arabic
-                  calligraphy, playing chess or guitar, caring for my 8 stray cats,
-                  or out on the soccer field.
-                </p>
-                <div className="skills-list">
-                  {['Excel', 'FactSet', 'Pitchbook', 'CrunchBase', 'PowerPoint',
-                    'Financial Modeling', 'Valuation', 'DCFs', 'VS Code'].map(
-                      (skill) => (
-                        <span key={skill} className="skill-tag">{skill}</span>
-                      )
-                    )}
-                </div>
-              </div>
-            </Reveal>
-            <Reveal delay={2}>
-              <div className="about-stats">
-                <div className="stat-card">
-                  <div className="stat-number">4.00</div>
-                  <div className="stat-label">GPA</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-number">75+</div>
-                  <div className="stat-label">Companies Sourced</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-number">$10K+</div>
-                  <div className="stat-label">Revenue</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-number">6</div>
-                  <div className="stat-label">Languages</div>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      <hr className="section-divider" />
-
-      {/* ─── EXPERIENCE ─── */}
-      <section className="section" id="experience">
-        <div className="container">
-          <Reveal>
-            <span className="section-label">Work</span>
-            <h2 className="section-title">Experience</h2>
-          </Reveal>
-          <div className="exp-list">
-            {experiences.map((exp, i) => (
-              <Reveal key={exp.title} delay={Math.min(i + 1, 5)}>
-                <div className="exp-card">
-                  <div className="exp-top-row">
-                    <div className="exp-title-group">
-                      <span className="exp-icon">{exp.icon}</span>
-                      <span className="exp-title">{exp.title}</span>
-                    </div>
-                    <span className="exp-date">{exp.date}</span>
-                  </div>
-                  <div className="exp-org">{exp.org}</div>
-                  <div className="exp-desc">{exp.desc}</div>
-                  <div className="exp-tech">
-                    {exp.tech.map((t) => (
-                      <span key={t} className="tech-tag">{t}</span>
-                    ))}
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <hr className="section-divider" />
-
-      {/* ─── LEADERSHIP ─── */}
-      <section className="section" id="leadership">
-        <div className="container">
-          <Reveal>
-            <span className="section-label">Leadership</span>
-            <h2 className="section-title">Activities &amp; Organizations</h2>
-          </Reveal>
-          <div className="resume-content" style={{ gridTemplateColumns: '1fr' }}>
-            <div className="resume-column">
-              <div className="timeline">
-                {leadership.map((item, i) => (
-                  <Reveal key={item.org} delay={Math.min(i + 1, 5)}>
-                    <div className="timeline-item">
-                      <div className="timeline-date">{item.date}</div>
-                      <div className="timeline-title">{item.role}</div>
-                      <div className="timeline-org">{item.org}</div>
-                      <div className="timeline-desc">{item.desc}</div>
-                    </div>
-                  </Reveal>
-                ))}
-              </div>
+          {!isDone && currentText && (
+            <div className="line muted" style={{ opacity: 1, transform: 'none' }}>
+              {currentText}
             </div>
-          </div>
-        </div>
-      </section>
+          )}
 
-      <hr className="section-divider" />
-
-      {/* ─── RESUME ─── */}
-      <section className="section" id="resume">
-        <div className="container">
-          <Reveal>
-            <span className="section-label">CV</span>
-            <h2 className="section-title">Education &amp; Skills</h2>
-          </Reveal>
-          <div className="resume-content">
-            <Reveal delay={1}>
-              <div className="resume-column">
-                <h3>Education</h3>
-                <div className="timeline">
-                  <div className="timeline-item">
-                    <div className="timeline-date">2025 — 2029</div>
-                    <div className="timeline-title">B.B.A., Canfield Business Honors</div>
-                    <div className="timeline-org">The University of Texas at Austin</div>
-                    <div className="timeline-desc">
-                      Certificate: Programming &amp; Computation · GPA: 4.00/4.00
-                      · University Honors
-                    </div>
-                  </div>
-                </div>
-                <h3 style={{ marginTop: '28px' }}>Honors</h3>
-                <div className="timeline">
-                  <div className="timeline-item">
-                    <div className="timeline-date">Spring 2026</div>
-                    <div className="timeline-title">Texas Stock Pitch Competition (PLOW)</div>
-                    <div className="timeline-desc">Qualified</div>
-                  </div>
-                  <div className="timeline-item">
-                    <div className="timeline-date">Spring 2025</div>
-                    <div className="timeline-title">UGA Stock Pitch Competition (FISV)</div>
-                    <div className="timeline-desc">Qualified</div>
-                  </div>
-                  <div className="timeline-item">
-                    <div className="timeline-date">2022 — 2025</div>
-                    <div className="timeline-title">DECA ICDC Qualifier &amp; State Finalist</div>
-                    <div className="timeline-desc">Financial Operations Research</div>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-            <Reveal delay={2}>
-              <div className="resume-column">
-                <h3>Skills</h3>
-                <div className="skills-grid">
-                  <div className="skill-item">
-                    <div className="skill-item-title">Technical</div>
-                    <div className="skill-item-list">
-                      Excel, FactSet, Pitchbook, CrunchBase, PowerPoint, VS Code, Cursor
-                    </div>
-                  </div>
-                  <div className="skill-item">
-                    <div className="skill-item-title">Finance</div>
-                    <div className="skill-item-list">
-                      Financial Modeling, Valuation, DCFs, 3-Statement Models, M&amp;A
-                    </div>
-                  </div>
-                  <div className="skill-item">
-                    <div className="skill-item-title">Languages</div>
-                    <div className="skill-item-list">
-                      Urdu (Native), Hindi &amp; Punjabi (Advanced), Hindko, Arabic, Spanish
-                    </div>
-                  </div>
-                  <div className="skill-item">
-                    <div className="skill-item-title">Interests</div>
-                    <div className="skill-item-list">
-                      Chai Making, Arabic Calligraphy, Thrifting, Chess, Guitar, Soccer, Boxing, Vlogging
-                    </div>
-                  </div>
-                </div>
-                <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                  <a href="/Hamza_Usman_Resume.pdf" download className="btn-primary">
-                    Download Full Resume ↓
-                  </a>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      <hr className="section-divider" />
-
-      {/* ─── CONTACT ─── */}
-      <section className="section" id="contact">
-        <div className="container">
-          <Reveal>
-            <div className="contact-content">
-              <span className="section-label" style={{ justifyContent: 'center' }}>
-                Contact
-              </span>
-              <h2 className="contact-title">
-                Let's build<br />something together.
-              </h2>
-              <p>
-                Always open to new opportunities, interesting projects,
-                and connecting with driven people.
-              </p>
-              <a href="mailto:hamzausman@utexas.edu" className="btn-primary">
-                Say Hello →
-              </a>
-              <div className="contact-links">
-                <a href="https://linkedin.com/in/hamzausman7/" className="contact-link" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
-                <a href="tel:+13463754079" className="contact-link">Call ↗</a>
-                <a href="mailto:hamzausman@utexas.edu" className="contact-link">Email ↗</a>
-                <a href="/Hamza_Usman_Resume.pdf" download className="contact-link">Resume ↓</a>
-              </div>
+          {!isDone && (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div className="cursor" />
+              {showSkip && (
+                <button className="skip-hint" onClick={skip}>
+                  press enter to skip
+                </button>
+              )}
             </div>
-          </Reveal>
+          )}
         </div>
-      </section>
+      </main>
 
-      <footer className="footer">
-        <div className="container">
-          <p>Hamza Usman · {new Date().getFullYear()}</p>
-        </div>
-      </footer>
-    </>
+      {isDone && (
+        <footer className="footer">
+          <div className="footer-links">
+            <a href="https://linkedin.com/in/hamzausman7/" target="_blank" rel="noopener noreferrer" aria-label="linkedin">
+              <LinkedInIcon />
+            </a>
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="github">
+              <GitHubIcon />
+            </a>
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="x">
+              <XIcon />
+            </a>
+          </div>
+        </footer>
+      )}
+    </div>
   )
 }
 
