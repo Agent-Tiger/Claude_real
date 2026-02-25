@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import longhornsLogo from './assets/longhorns.png'
 import './App.css'
 
-/* ── 3×5 sliding grid data ──────────────────────────── */
-// Exactly 15 items = 3 rows × 5 cols
-const allTags = [
+/* ── Content data ──────────────────────────────────── */
+const interests = [
   { label: 'chai making', href: 'https://en.wikipedia.org/wiki/Masala_chai' },
   { label: 'calligraphy', href: 'https://en.wikipedia.org/wiki/Arabic_calligraphy' },
   { label: 'thrifting', href: 'https://en.wikipedia.org/wiki/Thrift_store' },
@@ -14,6 +13,9 @@ const allTags = [
   { label: 'boxing', href: 'https://en.wikipedia.org/wiki/Boxing' },
   { label: 'vlogging', href: 'https://en.wikipedia.org/wiki/Vlog' },
   { label: 'running', href: 'https://en.wikipedia.org/wiki/Running' },
+]
+
+const languages = [
   { label: 'urdu', href: 'https://en.wikipedia.org/wiki/Urdu' },
   { label: 'hindi', href: 'https://en.wikipedia.org/wiki/Hindi' },
   { label: 'punjabi', href: 'https://en.wikipedia.org/wiki/Punjabi_language' },
@@ -22,154 +24,13 @@ const allTags = [
   { label: 'spanish', href: 'https://en.wikipedia.org/wiki/Spanish_language' },
 ]
 
-/* ── Sliding Grid component ─────────────────────────── */
-//
-// Logic:
-//   - Grid is 3 rows (0-2) x 5 columns (0-4).
-//   - We use a "Cycle" movement to ensure no overlaps and same speed.
-//   - Randomly chooses between:
-//     1. Shift Row (wrap-around)
-//     2. Shift Column (wrap-around)
-//     3. Rotate Outer Ring
-//   - Movements happen on a virtual 5x7 grid to show items "exiting and re-entering".
-//
-const ROWS = 3
-const COLS = 5
-const CW = 116   // cell width (px)
-const CH = 44    // cell height (px)
-const GAP = 8
-const ANIM_MS = 1200 // Slightly slower, smoother movement
-
-function SlidingGrid({ items }) {
-  // pos[i] = { col, row }
-  const [pos, setPos] = useState(() =>
-    items.map((_, i) => ({ col: i % COLS, row: Math.floor(i / COLS) }))
-  )
-  const [visualPos, setVisualPos] = useState(() =>
-    items.map((_, i) => ({ col: i % COLS, row: Math.floor(i / COLS) }))
-  )
-  const [noTrans, setNoTrans] = useState(new Set())
-  const busy = useRef(false)
-  const timerRef = useRef(null)
-
-  const doStep = useCallback(() => {
-    if (busy.current) return
-    busy.current = true
-
-    const moveType = Math.floor(Math.random() * 3) // 0: row, 1: col, 2: outer ring
-    const nextVisual = pos.map(p => ({ ...p }))
-    const nextPos = pos.map(p => ({ ...p }))
-    const movingIndices = []
-
-    if (moveType === 0) {
-      // Shift Row
-      const r = Math.floor(Math.random() * ROWS)
-      const d = Math.random() < 0.5 ? 1 : -1
-      for (let i = 0; i < items.length; i++) {
-        if (pos[i].row === r) {
-          nextVisual[i].col += d
-          nextPos[i].col = (pos[i].col + d + COLS) % COLS
-          movingIndices.push(i)
-        }
-      }
-    } else if (moveType === 1) {
-      // Shift Column
-      const c = Math.floor(Math.random() * COLS)
-      const d = Math.random() < 0.5 ? 1 : -1
-      for (let i = 0; i < items.length; i++) {
-        if (pos[i].col === c) {
-          nextVisual[i].row += d
-          nextPos[i].row = (pos[i].row + d + ROWS) % ROWS
-          movingIndices.push(i)
-        }
-      }
-    } else {
-      // Rotate Outer Ring
-      const d = Math.random() < 0.5 ? 1 : -1
-      // Outer ring indices in order: (0,0)->(1,0)->(2,0)->(3,0)->(4,0)->(4,1)->(4,2)->(3,2)->(2,2)->(1,2)->(0,2)->(0,1)
-      const ring = [
-        [0, 0], [1, 0], [2, 0], [3, 0], [4, 0],
-        [4, 1],
-        [4, 2], [3, 2], [2, 2], [1, 2], [0, 2],
-        [0, 1]
-      ]
-      for (let i = 0; i < items.length; i++) {
-        const ringIdx = ring.findIndex(([c, r]) => pos[i].col === c && pos[i].row === r)
-        if (ringIdx !== -1) {
-          const nextIdx = (ringIdx + d + ring.length) % ring.length
-          nextVisual[i].col += (ring[nextIdx][0] - ring[ringIdx][0])
-          nextVisual[i].row += (ring[nextIdx][1] - ring[ringIdx][1])
-          nextPos[i].col = ring[nextIdx][0]
-          nextPos[i].row = ring[nextIdx][1]
-          movingIndices.push(i)
-        }
-      }
-    }
-
-    setVisualPos(nextVisual)
-
-    setTimeout(() => {
-      setNoTrans(new Set(movingIndices))
-      setPos(nextPos)
-      setVisualPos(nextPos)
-      setTimeout(() => {
-        setNoTrans(new Set())
-        busy.current = false
-      }, 50)
-    }, ANIM_MS + 20)
-  }, [pos, items.length])
-
-  useEffect(() => {
-    function schedule() {
-      timerRef.current = setTimeout(() => {
-        doStep()
-        schedule()
-      }, 2500 + Math.random() * 2000)
-    }
-    schedule()
-    return () => clearTimeout(timerRef.current)
-  }, [doStep])
-
-  const offsetX = CW
-  const offsetY = CH
-
-  return (
-    <div className="sliding-grid" style={{ width: COLS * CW - GAP, height: ROWS * CH - GAP, position: 'relative' }}>
-      <div style={{ position: 'absolute', top: -offsetY, left: -offsetX, width: (COLS + 2) * CW, height: (ROWS + 2) * CH, pointerEvents: 'none' }}>
-        {items.map((item, i) => {
-          const { col, row } = visualPos[i]
-          const x = offsetX + col * CW
-          const y = offsetY + row * CH
-          const skip = noTrans.has(i)
-          return (
-            <a
-              key={item.label}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="grid-tag"
-              style={{
-                width: CW - GAP,
-                height: CH - GAP,
-                transform: `translate(${x}px, ${y}px)`,
-                transition: skip ? 'none' : `transform ${ANIM_MS}ms cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s, color 0.2s`,
-                pointerEvents: 'auto',
-              }}
-            >
-              {item.label}
-            </a>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-/* ── Content lines ──────────────────────────────────── */
 const contentLines = [
   { type: 'quote', text: '"slow is smooth, smooth is fast."', attr: '— russell sarre' },
   { text: '' },
   { text: 'investment banking, venture capital, and building from the ground up.' },
+  { text: '' },
+  { type: 'section-label', text: 'education' },
+  { type: 'education' },
   { text: '' },
   { type: 'section-label', text: 'currently' },
   { type: 'experience', role: 'tech ib intern', place: 'concordia capital', date: '2025–now' },
@@ -190,14 +51,11 @@ const contentLines = [
   { type: 'experience', role: 'impossiball', place: 'unity/c# game', date: '2018', href: 'https://agent-tiger.github.io/ImpossiBall/' },
   { type: 'experience', role: 'king of the hill', place: 'multiplayer game', date: '2019', href: 'https://agent-tiger.github.io/KingofHillWebsite/' },
   { text: '' },
-  { type: 'section-label', text: 'education' },
-  { type: 'education' },
+  { type: 'section-label', text: 'interests' },
+  { type: 'tag-grid', items: interests },
   { text: '' },
-  { type: 'section-label', text: 'etc.' },
-  { type: 'sliding-grid', items: allTags },
-  { text: '' },
-  { text: '' },
-  { type: 'contact', text: 'say hello →', href: 'mailto:hamzausman@utexas.edu' },
+  { type: 'section-label', text: 'languages' },
+  { type: 'tag-grid', items: languages },
 ]
 
 /* ── Typewriter hook ────────────────────────────────── */
@@ -239,7 +97,8 @@ function useTypewriter(lines) {
     }
     const line = lines[lineIndex]
     const text = line.text || ''
-    const instant = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'sliding-grid']
+    const instant = ['experience', 'section-label', 'quote', 'cv-button', 'education', 'tag-grid']
+
     if (!text || instant.includes(line.type)) {
       const delay = line.type === 'section-label' ? SECTION_PAUSE : LINE_PAUSE
       const t = setTimeout(() => {
@@ -250,6 +109,7 @@ function useTypewriter(lines) {
       }, delay)
       return () => clearTimeout(t)
     }
+
     if (charIndex < text.length) {
       const t = setTimeout(() => {
         setCurrentText(text.slice(0, charIndex + 1))
@@ -257,6 +117,7 @@ function useTypewriter(lines) {
       }, TYPE_DELAY)
       return () => clearTimeout(t)
     }
+
     const t = setTimeout(() => {
       setVisibleLines(p => [...p, line])
       setLineIndex(p => p + 1)
@@ -269,9 +130,22 @@ function useTypewriter(lines) {
   return { visibleLines, currentText, isDone, showSkip, skip }
 }
 
-/* ── Line renderer ──────────────────────────────────── */
+/* ── Components ────────────────────────────────────── */
+
+function TagGrid({ items }) {
+  return (
+    <div className="tag-grid">
+      {items.map(item => (
+        <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" className="tag">
+          {item.label}
+        </a>
+      ))}
+    </div>
+  )
+}
+
 function Line({ line, index }) {
-  const instantTypes = ['experience', 'section-label', 'contact', 'quote', 'cv-button', 'education', 'sliding-grid']
+  const instantTypes = ['experience', 'section-label', 'quote', 'cv-button', 'education', 'tag-grid']
   if (!line.text && !instantTypes.includes(line.type)) return <div className="line-spacer" />
 
   if (line.type === 'section-label') {
@@ -288,9 +162,9 @@ function Line({ line, index }) {
       </div>
     )
     return (
-      <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
+      <div className="line">
         {line.href
-          ? <a href={line.href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', textDecoration: 'none' }}>{content}</a>
+          ? <a href={line.href} target="_blank" rel="noopener noreferrer" className="no-underline">{content}</a>
           : content}
       </div>
     )
@@ -298,15 +172,17 @@ function Line({ line, index }) {
 
   if (line.type === 'cv-button') {
     return (
-      <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
-        <a href="/Hamza_Usman_Resume.pdf" download className="cv-button">↓ download cv</a>
+      <div className="line">
+        <a href="/Hamza_Usman_Resume.pdf" download className="cv-button no-underline">
+          ↓ download cv
+        </a>
       </div>
     )
   }
 
   if (line.type === 'education') {
     return (
-      <div className="line education-block" style={{ animationDelay: `${index * 30}ms` }}>
+      <div className="line education-block">
         <div className="edu-logo">
           <img src={longhornsLogo} alt="UT Austin" className="edu-logo-img" />
         </div>
@@ -319,35 +195,26 @@ function Line({ line, index }) {
     )
   }
 
-  if (line.type === 'sliding-grid') {
+  if (line.type === 'tag-grid') {
     return (
-      <div className="line sliding-grid-wrapper" style={{ animationDelay: `${index * 30}ms` }}>
-        <SlidingGrid items={line.items} />
-      </div>
-    )
-  }
-
-  if (line.type === 'contact') {
-    return (
-      <div className="line" style={{ animationDelay: `${index * 30}ms` }}>
-        <a href={line.href} style={{ textDecoration: 'underline', textDecorationColor: '#ececec' }}>{line.text}</a>
+      <div className="line">
+        <TagGrid items={line.items} />
       </div>
     )
   }
 
   if (line.type === 'quote') {
     return (
-      <div className="line quote-section" style={{ animationDelay: `${index * 30}ms` }}>
+      <div className="line quote-section">
         <div className="quote-text">{line.text}</div>
         {line.attr && <div className="quote-attr">{line.attr}</div>}
       </div>
     )
   }
 
-  return <div className="line muted" style={{ animationDelay: `${index * 30}ms` }}>{line.text}</div>
+  return <div className="line muted">{line.text}</div>
 }
 
-/* ── Clock ──────────────────────────────────────────── */
 function Clock() {
   const [now, setNow] = useState(new Date())
   useEffect(() => {
@@ -377,6 +244,7 @@ function InstagramIcon() {
 }
 
 /* ── App ────────────────────────────────────────────── */
+
 function App() {
   const { visibleLines, currentText, isDone, showSkip, skip } = useTypewriter(contentLines)
 
@@ -389,28 +257,41 @@ function App() {
       </header>
       <main className="main">
         <div className="content">
-          {visibleLines.map((line, i) => <Line key={i} line={line} index={i} />)}
+          {visibleLines.map((line, i) => (
+            <Line key={i} line={line} index={i} />
+          ))}
+
           {!isDone && currentText && (
-            <div className="line muted" style={{ opacity: 1, transform: 'none' }}>{currentText}</div>
+            <div className="line muted" style={{ opacity: 1, transform: 'none' }}>
+              {currentText}
+            </div>
           )}
+
           {!isDone && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div className="cursor" />
-              {showSkip && <button className="skip-hint" onClick={skip}>press enter to skip</button>}
+              {showSkip && (
+                <button className="skip-hint" onClick={skip}>
+                  press enter to skip
+                </button>
+              )}
             </div>
           )}
         </div>
       </main>
-      {isDone && (
-        <footer className="footer">
+      <footer className="footer">
+        <div className="footer-container">
+          <a href="mailto:hamzausman@utexas.edu" className="say-hello no-underline">
+            say hello →
+          </a>
           <div className="footer-links">
             <a href="https://linkedin.com/in/hamzausman7/" target="_blank" rel="noopener noreferrer" aria-label="linkedin"><LinkedInIcon /></a>
             <a href="https://github.com/Agent-Tiger" target="_blank" rel="noopener noreferrer" aria-label="github"><GitHubIcon /></a>
             <a href="https://x.com/hamza777usman" target="_blank" rel="noopener noreferrer" aria-label="x"><XIcon /></a>
             <a href="https://instagram.com/just_hamzau" target="_blank" rel="noopener noreferrer" aria-label="instagram"><InstagramIcon /></a>
           </div>
-        </footer>
-      )}
+        </div>
+      </footer>
     </div>
   )
 }
