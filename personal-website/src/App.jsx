@@ -25,11 +25,9 @@ const languages = [
 ]
 
 const contentLines = [
-  { type: 'quote', text: '"slow is smooth, smooth is fast."', attr: '— russell sarre' },
+  { type: 'quote', text: '"There is nothing impossible to him who will try" (Alexander the Great)' },
   { text: '' },
-  { text: 'investment banking, venture capital, and building from the ground up.' },
-  { text: '' },
-  { type: 'section-label', text: 'education' },
+  { type: 'section-label', text: 'horns up' },
   { type: 'education' },
   { text: '' },
   { type: 'section-label', text: 'currently' },
@@ -205,9 +203,10 @@ function Line({ line, index }) {
 
   if (line.type === 'quote') {
     return (
-      <div className="line quote-section">
-        <div className="quote-text">{line.text}</div>
-        {line.attr && <div className="quote-attr">{line.attr}</div>}
+      <div className="line quote-container" style={{ animationDelay: `${index * 30}ms` }}>
+        <div className="quote-section">
+          <span className="quote-text">{line.text}</span>
+        </div>
       </div>
     )
   }
