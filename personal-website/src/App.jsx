@@ -10,37 +10,68 @@ function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const projects = [
+  const experiences = [
     {
-      icon: '📈',
-      title: 'Algorithmic Trading Platform',
-      desc: 'A fully automated trading system with walk-forward optimization, multi-strategy portfolio management, and real-time signal generation for NYSE/NASDAQ equities.',
-      tech: ['Python', 'Pandas', 'NumPy', 'APIs', 'Statistics'],
+      icon: '🏦',
+      title: 'Tech Investment Banking Intern',
+      org: 'Concordia Capital · Remote',
+      desc: 'Supporting buyside tech M&A deal execution through financial modeling, industry research, and sourcing. Evaluated 75+ companies across Video Game Marketing and B2B Enterprise AI, presenting acquisition targets.',
+      tech: ['Financial Modeling', 'M&A', 'Industry Research', 'Deal Execution'],
       featured: true,
     },
     {
-      icon: '🧠',
-      title: 'ML Sentiment Analyzer',
-      desc: 'NLP-powered sentiment analysis model trained on financial news to predict market movement direction with custom feature engineering.',
-      tech: ['Python', 'scikit-learn', 'NLTK', 'TensorFlow'],
+      icon: '🛍️',
+      title: 'Founder',
+      org: 'Organic Roots · Houston, TX',
+      desc: 'Launched a Shopify store for handmade traditional Pakistani clothing, building site architecture and payment integration. Generated $10K+ in revenue via targeted Facebook/Instagram campaigns.',
+      tech: ['Shopify', 'E-Commerce', 'Digital Marketing', 'Entrepreneurship'],
     },
     {
-      icon: '🌐',
-      title: 'Portfolio Dashboard',
-      desc: 'Real-time portfolio monitoring dashboard with interactive charts, PnL tracking, and automated performance reporting.',
-      tech: ['React', 'D3.js', 'Node.js', 'WebSocket'],
+      icon: '📚',
+      title: 'Private Tutor',
+      org: 'AP SAT Tutorial · Spring, TX',
+      desc: 'Tutored 15+ students in SAT/ACT, Calculus, Physics, and Algebra, contributing to an average score increase of 15%. Led 7 students to score top 5% nationally and gain ~$400K in scholarships.',
+      tech: ['Teaching', 'Curriculum Design', 'SAT/ACT', 'STEM'],
     },
     {
       icon: '🎮',
-      title: 'Wordle Clone',
-      desc: 'A clean, modular, production-quality Wordle implementation with extensible architecture and comprehensive word validation.',
-      tech: ['Python', 'OOP', 'Unit Testing'],
+      title: 'Android Game Developer',
+      org: 'Impossiball & King of the Hill · Spring, TX',
+      desc: 'Developed and published 2 original Android/Web games in C# and Unity, generating over 150 downloads and impressions. Managed full app design lifecycle from testing to publication.',
+      tech: ['C#', 'Unity', 'Game Design', 'Android'],
+    },
+  ]
+
+  const leadership = [
+    {
+      role: 'Junior Analyst',
+      org: 'Texas Venture Group',
+      date: 'Spring 2026 — Present',
+      desc: 'Identified early-stage companies with scalable ARR and founder-market fit for partners (a16z, RRE, 8VC). Researched investment thesis around AI-driven fintech segments.',
     },
     {
-      icon: '⚡',
-      title: 'Backtesting Engine',
-      desc: 'High-performance backtesting framework supporting multiple strategies, position sizing, and detailed trade analytics with benchmark comparison.',
-      tech: ['Python', 'Pandas', 'Matplotlib'],
+      role: 'Junior Analyst',
+      org: 'Texas Capital Collective',
+      date: 'Fall 2025 — Present',
+      desc: 'Selected as 1 of 7 members (<5% acceptance) for a finance organization. Completed 20-hour technical curriculum covering accounting, valuation, modeling; built 3-statement models and DCFs.',
+    },
+    {
+      role: 'General Analyst',
+      org: 'University Securities Investment Team',
+      date: 'Fall 2025 — Present',
+      desc: 'Pitched DLO and AGYS to meetings of 100+ members for contribution to a $50k+ long/short public equities portfolio through analyst groups and stock pitches.',
+    },
+    {
+      role: 'Co-Founder',
+      org: 'Circle of Champions',
+      date: 'Fall 2024 — Summer 2025',
+      desc: 'Built a network across 12+ Houston-area schools and organized 70+ attendees for multiple religious and social events. Secured over 2k of funding in grants and operating capital.',
+    },
+    {
+      role: 'Co-Founder',
+      org: 'Klein Business Academy',
+      date: 'Summer 2023 — Summer 2025',
+      desc: 'Taught financial literacy and business fundamentals to 30+ students via 3-month workshops. Grew engagement and impressions over 500% through outreach and social media campaigns.',
     },
   ]
 
@@ -54,11 +85,12 @@ function App() {
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="container">
           <a href="#" className="nav-logo">
-            hamza<span className="dot">.</span>dev
+            hamza<span className="dot">.</span>
           </a>
           <ul className="nav-links">
             <li><a href="#about">About</a></li>
-            <li><a href="#projects">Projects</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#leadership">Leadership</a></li>
             <li><a href="#resume">Resume</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
@@ -73,14 +105,15 @@ function App() {
         <div className="container">
           <div className="hero-content animate-in">
             <p className="hero-greeting">Hello, I'm</p>
-            <h1 className="hero-name shimmer-text">Hamza.</h1>
+            <h1 className="hero-name shimmer-text">Hamza Usman.</h1>
             <p className="hero-tagline">
-              A Computer Science student passionate about building elegant
-              software — from algorithmic trading systems to full-stack web apps.
+              Business &amp; finance student at UT Austin with a passion for
+              investment banking, venture capital, and building things from the
+              ground up.
             </p>
             <div className="hero-cta-group">
-              <a href="#projects" className="btn-primary">
-                View Projects ↓
+              <a href="#experience" className="btn-primary">
+                View Experience ↓
               </a>
               <a href="#contact" className="btn-secondary">
                 Get in Touch
@@ -96,86 +129,84 @@ function App() {
         <div className="container">
           <span className="section-label animate-in">About Me</span>
           <h2 className="section-title animate-in">
-            Building things that matter.
+            Finance meets hustle.
           </h2>
           <div className="about-grid">
             <div className="about-text animate-in animate-delay-1">
               <p>
-                I'm a Computer Science student with a deep interest in
-                quantitative finance, software engineering, and data-driven
-                problem solving. I spend most of my time designing systems that
-                bridge the gap between theory and real-world application.
+                I'm a student at <strong>The University of Texas at Austin</strong>,
+                pursuing a Bachelor of Business Administration in the Canfield
+                Business Honors program with a Certificate in Programming &amp;
+                Computation. I hold a 4.00/4.00 GPA and University Honors.
               </p>
               <p>
-                From building automated trading platforms that analyze equity
-                markets to crafting clean, modular web applications, I thrive on
-                turning complex problems into elegant solutions.
+                My experience spans tech investment banking at Concordia Capital,
+                founding an e-commerce brand, venture capital analysis, and
+                building communities from the ground up. I thrive at the
+                intersection of finance, technology, and entrepreneurship.
               </p>
               <p>
-                When I'm not coding, you'll find me diving into research papers,
-                exploring new frameworks, or working on personal projects that
-                challenge my thinking.
+                Outside of work, you'll find me making chai, practicing Arabic
+                calligraphy, playing chess or guitar, caring for my 8 stray cats,
+                or out on the soccer field.
               </p>
               <div className="skills-list">
-                {['Python', 'JavaScript', 'React', 'Node.js', 'C++', 'SQL',
-                  'Git', 'Machine Learning', 'Data Analysis', 'REST APIs'].map(
-                  (skill) => (
-                    <span key={skill} className="skill-tag">{skill}</span>
-                  )
-                )}
+                {['Excel', 'FactSet', 'Pitchbook', 'CrunchBase', 'PowerPoint',
+                  'VS Code', 'Financial Modeling', 'Valuation', 'DCFs'].map(
+                    (skill) => (
+                      <span key={skill} className="skill-tag">{skill}</span>
+                    )
+                  )}
               </div>
             </div>
             <div className="about-stats animate-in animate-delay-2">
               <div className="stat-card">
-                <div className="stat-number">10+</div>
-                <div className="stat-label">Projects Built</div>
+                <div className="stat-number">4.00</div>
+                <div className="stat-label">GPA</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">3+</div>
-                <div className="stat-label">Years Coding</div>
+                <div className="stat-number">75+</div>
+                <div className="stat-label">Companies Sourced</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">5+</div>
-                <div className="stat-label">Technologies</div>
+                <div className="stat-number">$10K+</div>
+                <div className="stat-label">Revenue Generated</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">∞</div>
-                <div className="stat-label">Curiosity</div>
+                <div className="stat-number">6</div>
+                <div className="stat-label">Languages Spoken</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Projects */}
-      <section className="section" id="projects">
+      {/* Experience */}
+      <section className="section" id="experience">
         <div className="container">
-          <span className="section-label animate-in">Portfolio</span>
-          <h2 className="section-title animate-in">Selected Projects</h2>
+          <span className="section-label animate-in">Work</span>
+          <h2 className="section-title animate-in">Experience</h2>
           <div className="projects-grid">
-            {projects.map((project, i) => (
+            {experiences.map((exp, i) => (
               <div
-                key={project.title}
-                className={`project-card animate-in animate-delay-${i % 4 + 1} ${
-                  project.featured ? 'featured' : ''
-                }`}
+                key={exp.title}
+                className={`project-card animate-in animate-delay-${i % 4 + 1} ${exp.featured ? 'featured' : ''
+                  }`}
               >
-                {project.featured && (
-                  <div className="project-preview">{project.icon}</div>
+                {exp.featured && (
+                  <div className="project-preview">{exp.icon}</div>
                 )}
                 <div>
                   <div className="project-header">
-                    {!project.featured && (
-                      <div className="project-icon">{project.icon}</div>
+                    {!exp.featured && (
+                      <div className="project-icon">{exp.icon}</div>
                     )}
-                    <div className="project-links">
-                      <a href="#" title="Code">Code ↗</a>
-                    </div>
                   </div>
-                  <h3 className="project-title">{project.title}</h3>
-                  <p className="project-desc">{project.desc}</p>
+                  <h3 className="project-title">{exp.title}</h3>
+                  <p className="timeline-org" style={{ marginBottom: '12px' }}>{exp.org}</p>
+                  <p className="project-desc">{exp.desc}</p>
                   <div className="project-tech">
-                    {project.tech.map((t) => (
+                    {exp.tech.map((t) => (
                       <span key={t} className="tech-tag">{t}</span>
                     ))}
                   </div>
@@ -186,33 +217,68 @@ function App() {
         </div>
       </section>
 
-      {/* Resume / CS */}
+      {/* Leadership */}
+      <section className="section" id="leadership">
+        <div className="container">
+          <span className="section-label animate-in">Leadership</span>
+          <h2 className="section-title animate-in">Activities &amp; Organizations</h2>
+          <div className="resume-content" style={{ gridTemplateColumns: '1fr' }}>
+            <div className="resume-column animate-in animate-delay-1">
+              <div className="timeline">
+                {leadership.map((item) => (
+                  <div key={item.org} className="timeline-item">
+                    <div className="timeline-date">{item.date}</div>
+                    <div className="timeline-title">{item.role}</div>
+                    <div className="timeline-org">{item.org}</div>
+                    <div className="timeline-desc">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Resume / CV */}
       <section className="section" id="resume">
         <div className="container">
           <span className="section-label animate-in">Curriculum Vitae</span>
-          <h2 className="section-title animate-in">Experience & Education</h2>
+          <h2 className="section-title animate-in">Education &amp; Skills</h2>
           <div className="resume-content">
             <div className="resume-column animate-in animate-delay-1">
               <h3>Education</h3>
               <div className="timeline">
                 <div className="timeline-item">
-                  <div className="timeline-date">2023 — Present</div>
-                  <div className="timeline-title">B.S. Computer Science</div>
-                  <div className="timeline-org">University</div>
+                  <div className="timeline-date">2025 — 2029</div>
+                  <div className="timeline-title">
+                    B.B.A., Canfield Business Honors
+                  </div>
+                  <div className="timeline-org">
+                    The University of Texas at Austin
+                  </div>
                   <div className="timeline-desc">
-                    Focused on algorithms, data structures, machine learning,
-                    and software engineering. Active in programming competitions
-                    and research projects.
+                    Certificate: Programming &amp; Computation · GPA: 4.00/4.00
+                    · University Honors (Fall 2025 — Spring 2026)
                   </div>
                 </div>
+              </div>
+
+              <h3 style={{ marginTop: '36px' }}>Honors</h3>
+              <div className="timeline">
                 <div className="timeline-item">
-                  <div className="timeline-date">2019 — 2023</div>
-                  <div className="timeline-title">High School Diploma</div>
-                  <div className="timeline-org">High School</div>
-                  <div className="timeline-desc">
-                    Graduated with honors. Developed early programming skills
-                    through self-study and coursework.
-                  </div>
+                  <div className="timeline-date">Spring 2026</div>
+                  <div className="timeline-title">Texas Stock Pitch Competition (PLOW)</div>
+                  <div className="timeline-desc">Qualified</div>
+                </div>
+                <div className="timeline-item">
+                  <div className="timeline-date">Spring 2025</div>
+                  <div className="timeline-title">UGA Stock Pitch Competition (FISV)</div>
+                  <div className="timeline-desc">Qualified</div>
+                </div>
+                <div className="timeline-item">
+                  <div className="timeline-date">Spring 2022 — Spring 2025</div>
+                  <div className="timeline-title">DECA ICDC Qualifier &amp; State Finalist</div>
+                  <div className="timeline-desc">Financial Operations Research</div>
                 </div>
               </div>
             </div>
@@ -220,27 +286,27 @@ function App() {
               <h3>Skills</h3>
               <div className="skills-grid">
                 <div className="skill-item">
+                  <div className="skill-item-title">Technical</div>
+                  <div className="skill-item-list">
+                    Excel, FactSet, Pitchbook, CrunchBase, PowerPoint, VS Code, Cursor
+                  </div>
+                </div>
+                <div className="skill-item">
+                  <div className="skill-item-title">Finance</div>
+                  <div className="skill-item-list">
+                    Financial Modeling, Valuation, DCFs, 3-Statement Models, M&amp;A
+                  </div>
+                </div>
+                <div className="skill-item">
                   <div className="skill-item-title">Languages</div>
                   <div className="skill-item-list">
-                    Python, JavaScript, C++, SQL, HTML/CSS
-                  </div>
-                </div>
-                <div className="skill-item">
-                  <div className="skill-item-title">Frameworks</div>
-                  <div className="skill-item-list">
-                    React, Node.js, Express, Pandas, NumPy
-                  </div>
-                </div>
-                <div className="skill-item">
-                  <div className="skill-item-title">Tools</div>
-                  <div className="skill-item-list">
-                    Git, Docker, VS Code, Linux, Jupyter
+                    Urdu (Native), Hindi &amp; Punjabi (Advanced), Hindko, Arabic, Spanish (Conversational)
                   </div>
                 </div>
                 <div className="skill-item">
                   <div className="skill-item-title">Interests</div>
                   <div className="skill-item-list">
-                    Quantitative Finance, ML/AI, Systems Design
+                    Chai Making, Arabic Calligraphy, Thrifting, Chess, Guitar, Soccer, Boxing, Running, Vlogging
                   </div>
                 </div>
               </div>
@@ -261,15 +327,15 @@ function App() {
             </h2>
             <p>
               I'm always open to discussing new opportunities, interesting
-              projects, or just connecting with fellow developers.
+              projects, or just connecting with fellow driven people.
             </p>
-            <a href="mailto:hamza@example.com" className="btn-primary">
+            <a href="mailto:hamzausman@utexas.edu" className="btn-primary">
               Say Hello →
             </a>
             <div className="contact-links">
-              <a href="#" className="contact-link">GitHub ↗</a>
-              <a href="#" className="contact-link">LinkedIn ↗</a>
-              <a href="#" className="contact-link">Resume ↗</a>
+              <a href="https://linkedin.com/in/hamzausman7/" className="contact-link" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+              <a href="tel:+13463754079" className="contact-link">Call ↗</a>
+              <a href="mailto:hamzausman@utexas.edu" className="contact-link">Email ↗</a>
             </div>
           </div>
         </div>
@@ -279,7 +345,7 @@ function App() {
       <footer className="footer">
         <div className="container">
           <p>
-            Designed & built by Hamza · {new Date().getFullYear()}
+            Designed & built by Hamza Usman · {new Date().getFullYear()}
           </p>
         </div>
       </footer>
