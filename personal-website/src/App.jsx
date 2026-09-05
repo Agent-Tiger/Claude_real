@@ -34,14 +34,17 @@ const contentLines = [
   { type: 'education' },
   { text: '' },
   { type: 'section-label', text: 'currently' },
-  { type: 'experience', role: 'tech ib intern', place: 'concordia capital', date: '2025–now' },
-  { type: 'experience', role: 'junior analyst', place: 'texas venture group', date: '2026–now' },
-  { type: 'experience', role: 'junior analyst', place: 'texas capital collective', date: '2025–now' },
+  { type: 'experience', role: 'hedge fund research intern', place: 'atom lp', date: '2026–now' },
+  { type: 'experience', role: 'equity research analyst', place: 'consortium research group', date: '2026–now' },
+  { type: 'experience', role: 'associate', place: 'texas venture group', date: '2026–now' },
+  { type: 'experience', role: 'senior analyst', place: 'texas capital collective', date: '2025–now' },
   { type: 'experience', role: 'general analyst', place: 'university securities investment team', date: '2025–now' },
   { text: '' },
   { type: 'cv-button', text: '↓ download cv' },
   { text: '' },
   { type: 'section-label', text: 'previously' },
+  { type: 'experience', role: 'ib summer analyst', place: 'logan growth advisors', date: '2026' },
+  { type: 'experience', role: 'tech ib intern', place: 'concordia capital', date: '2025–2026' },
   { type: 'experience', role: 'founder', place: 'organic roots', date: '2024' },
   { type: 'experience', role: 'expeditor', place: 'mia bella trattoria', date: '2024' },
   { type: 'experience', role: 'private tutor', place: 'ap sat tutorial', date: '2020–2023' },
@@ -49,8 +52,10 @@ const contentLines = [
   { type: 'experience', role: 'co-founder', place: 'klein business academy', date: '2023–2025' },
   { text: '' },
   { type: 'section-label', text: 'cool projects' },
-  { type: 'experience', role: 'impossiball', place: 'unity/c# game', date: '2018', href: 'https://agent-tiger.github.io/ImpossiBall/' },
-  { type: 'experience', role: 'king of the hill', place: 'multiplayer game', date: '2019', href: 'https://agent-tiger.github.io/KingofHillWebsite/' },
+  { type: 'experience', role: 'baba', place: 'seed deck + valuation model', date: '2026' },
+  { type: 'experience', role: 'spacex sotp', place: 'equity research', date: '2026' },
+  { type: 'experience', role: 'impossiball', place: 'unity/c# game', date: '2023', href: 'https://agent-tiger.github.io/ImpossiBall/' },
+  { type: 'experience', role: 'king of the hill', place: 'multiplayer game', date: '2024', href: 'https://agent-tiger.github.io/KingofHillWebsite/' },
   { text: '' },
   { type: 'section-label', text: 'interests' },
   { type: 'tag-grid', items: interests },
@@ -317,7 +322,7 @@ function App() {
             say hello →
           </a>
           <div className="footer-links">
-            <a href="https://linkedin.com/in/hamzausman7/" target="_blank" rel="noopener noreferrer" aria-label="linkedin"><LinkedInIcon /></a>
+            <a href="https://linkedin.com/in/hamza~usman/" target="_blank" rel="noopener noreferrer" aria-label="linkedin"><LinkedInIcon /></a>
             <a href="https://github.com/Agent-Tiger" target="_blank" rel="noopener noreferrer" aria-label="github"><GitHubIcon /></a>
             <a href="https://x.com/hamza777usman" target="_blank" rel="noopener noreferrer" aria-label="x"><XIcon /></a>
             <a href="https://instagram.com/just_hamzau" target="_blank" rel="noopener noreferrer" aria-label="instagram"><InstagramIcon /></a>
